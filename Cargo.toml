@@ -9,5 +9,6 @@ edition = "2018"
 [dependencies]
 actix-web = "1.0"
 actix = "0.8"
+handlebars = "2.0"
 log = "0.4"
 simplelog = "0.7"

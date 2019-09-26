@@ -1,12 +1,10 @@
 use ::actix::prelude::*;
 use ::log::info;
-use ::std::{thread, time};
 
-use crate::task::{NewTask};
+use crate::task::NewTask;
 
 #[derive(Default)]
 pub struct QueueActor;
-
 
 impl Actor for QueueActor {
     type Context = SyncContext<Self>;
@@ -16,11 +14,10 @@ impl Actor for QueueActor {
     }
 }
 
-
 impl Handler<NewTask> for QueueActor {
     type Result = ();
 
-    fn handle(&mut self, _: NewTask, _: &mut SyncContext<Self>) {
-        info!("Got new Task");
+    fn handle(&mut self, task: NewTask, context: &mut SyncContext<Self>) {
+        info!("Got new Task: {}", task.id);
     }
 }

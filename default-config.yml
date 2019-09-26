@@ -1,0 +1,10 @@
+domain: 127.0.0.1
+port: 8000
+ssh-cert: null
+workers: 8
+webhooks:
+  -
+    name: 'test-webhook'
+    command: '/tmp/test_script.sh {{param1}} {{param2}}'
+    mode: ''
+    parallel: 0
