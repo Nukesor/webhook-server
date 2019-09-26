@@ -10,7 +10,6 @@ pub struct NewTask {
     pub command: String,
 }
 
-
 #[derive(Message)]
 pub struct StartTask {
     pub command: String,

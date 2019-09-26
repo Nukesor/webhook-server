@@ -4,12 +4,10 @@ use ::log::info;
 use crate::messages::*;
 use crate::task_actor::TaskActor;
 
-
 pub struct QueueActor {
     pub task_actor: Addr<TaskActor>,
-    pub own_addr: Option<Addr<Self>>
+    pub own_addr: Option<Addr<Self>>,
 }
-
 
 impl Actor for QueueActor {
     type Context = Context<Self>;
@@ -23,13 +21,12 @@ impl Actor for QueueActor {
 impl Handler<NewTask> for QueueActor {
     type Result = ();
 
-    fn handle(&mut self, new_task: NewTask, context: &mut Self::Context) {
+    fn handle(&mut self, new_task: NewTask, _context: &mut Self::Context) {
         info!("Got new Task: {}", new_task.id);
 
         self.dispatch_task(new_task);
     }
 }
-
 
 impl QueueActor {
     fn dispatch_task(&mut self, new_task: NewTask) {

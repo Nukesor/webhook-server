@@ -4,7 +4,6 @@ use ::handlebars::Handlebars;
 use ::log::info;
 use ::std::collections::HashMap;
 
-
 /// Verify that the template renders with the given parameters
 pub fn verify_template_parameters(
     template: String,

@@ -1,20 +1,18 @@
 use ::actix::prelude::*;
-use ::actix_web::*;
 use ::actix_web::middleware::Logger;
+use ::actix_web::*;
 
-use ::std::collections::HashMap;
 use ::log::info;
+use ::std::collections::HashMap;
 
-use crate::queue_actor::QueueActor;
 use crate::messages::NewTask;
+use crate::queue_actor::QueueActor;
 use crate::template::verify_template_parameters;
-
 
 /// State of the actix-web application
 struct AppState {
     queue_actor: Addr<QueueActor>,
 }
-
 
 /// Index route
 fn webhook(
