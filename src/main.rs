@@ -23,5 +23,5 @@ fn main() {
 
     init_web_server(queue_actor.start());
 
-    sys.run();
+    let _ = sys.run();
 }

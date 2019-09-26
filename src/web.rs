@@ -1,5 +1,4 @@
 use ::actix::prelude::*;
-use ::actix_web::middleware::Logger;
 use ::actix_web::*;
 
 use ::log::info;
@@ -22,15 +21,15 @@ fn webhook(
 ) -> Result<HttpResponse, HttpResponse> {
     // Verify that the parameters match the required parameters in the template string
     let params = query.into_inner();
-    let webhook_id = path_info.into_inner();
+    let webhook_name = path_info.into_inner();
 
     info!("");
-    info!("Incoming webhook for \"{}\":", webhook_id);
-    let command = verify_template_parameters("This is a test {{rofl}}".to_string(), &params)?;
+    info!("Incoming webhook for \"{}\":", webhook_name);
+    let command = verify_template_parameters("ls {{rofl}}".to_string(), &params)?;
 
-    // Create a new task with the checked parameters and webhook id
+    // Create a new task with the checked parameters and webhook name
     let new_task = NewTask {
-        id: webhook_id,
+        name: webhook_name,
         parameters: params,
         command: command,
     };
@@ -50,8 +49,7 @@ pub fn init_web_server(queue_actor: Addr<QueueActor>) {
             .data(AppState {
                 queue_actor: queue_actor.clone(),
             })
-            .wrap(Logger::default())
-            .service(web::resource("/webhook/{webhook_id}").to(webhook))
+            .service(web::resource("/webhook/{webhook_name}").to(webhook))
     })
     .bind("127.0.0.1:8000")
     .unwrap()

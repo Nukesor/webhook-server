@@ -18,15 +18,26 @@ impl Actor for QueueActor {
     }
 }
 
+
 impl Handler<NewTask> for QueueActor {
     type Result = ();
 
     fn handle(&mut self, new_task: NewTask, _context: &mut Self::Context) {
-        info!("Got new Task: {}", new_task.id);
+        info!("Got new Task: {}", new_task.name);
 
         self.dispatch_task(new_task);
     }
 }
+
+
+impl Handler<TaskCompleted> for QueueActor {
+    type Result = ();
+
+    fn handle(&mut self, message: TaskCompleted, _context: &mut Self::Context) {
+        info!("Finished task: {}", message.command);
+    }
+}
+
 
 impl QueueActor {
     fn dispatch_task(&mut self, new_task: NewTask) {
