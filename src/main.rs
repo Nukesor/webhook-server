@@ -1,4 +1,4 @@
-mod task;
+mod messages;
 mod template;
 mod queue_actor;
 mod task_actor;
@@ -8,16 +8,18 @@ use ::actix::prelude::*;
 use ::simplelog::{Config, LevelFilter, SimpleLogger};
 
 use crate::queue_actor::QueueActor;
+use crate::task_actor::TaskActor;
 use crate::web::init_web_server;
 
 
 fn main() {
     let sys = System::new("webhook-server");
-    let queue_actor = SyncArbiter::start(1, move || QueueActor::default());
+    let task_actor = SyncArbiter::start(8, move || TaskActor{queue_actor: None});
+    let queue_actor = QueueActor{task_actor: task_actor.clone(), own_addr: None};
 
     let _ = SimpleLogger::init(LevelFilter::Info, Config::default());
 
-    init_web_server(queue_actor);
+    init_web_server(queue_actor.start());
 
     sys.run();
 }

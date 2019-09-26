@@ -6,7 +6,7 @@ use ::std::collections::HashMap;
 use ::log::info;
 
 use crate::queue_actor::QueueActor;
-use crate::task::NewTask;
+use crate::messages::NewTask;
 use crate::template::verify_template_parameters;
 
 
@@ -28,12 +28,13 @@ fn webhook(
 
     info!("");
     info!("Incoming webhook for \"{}\":", webhook_id);
-    verify_template_parameters("This is a test {{rofl}}".to_string(), &params)?;
+    let command = verify_template_parameters("This is a test {{rofl}}".to_string(), &params)?;
 
     // Create a new task with the checked parameters and webhook id
     let new_task = NewTask {
         id: webhook_id,
         parameters: params,
+        command: command,
     };
 
     // Send the task to the actor managing the queue
@@ -42,6 +43,9 @@ fn webhook(
     Ok(HttpResponse::Ok().finish())
 }
 
+/// Initialize the web server
+/// Move the address of the queue actor inside the AppState for further dispatch
+/// of tasks to the actor
 pub fn init_web_server(queue_actor: Addr<QueueActor>) {
     HttpServer::new(move || {
         App::new()

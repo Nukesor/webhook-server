@@ -9,7 +9,7 @@ use ::std::collections::HashMap;
 pub fn verify_template_parameters(
     template: String,
     params: &HashMap<String, String>,
-) -> Result<(), HttpResponse> {
+) -> Result<String, HttpResponse> {
     info!("Got parameters: {:?}", params);
     // Create a new handlebar instance and enable strict mode to prevent missing or malformed arguments
     let mut handlebars = Handlebars::new();
@@ -23,7 +23,7 @@ pub fn verify_template_parameters(
         }
         Ok(result) => {
             info!("Template renders properly: {}", result);
-            Ok(())
+            Ok(result)
         }
     }
 }
