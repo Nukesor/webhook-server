@@ -1,0 +1,10 @@
+domain: 127.0.0.1
+port: 8000
+ssh_cert: null
+workers: 8
+webhooks:
+  -
+    name: 'ls'
+    command: '/bin/ls {{param1}} {{param2}}'
+    mode: ''
+    parallel_processes: 2

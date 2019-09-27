@@ -3,10 +3,12 @@ use ::log::info;
 
 use crate::messages::*;
 use crate::task_actor::TaskActor;
+use crate::settings::Settings;
 
 pub struct QueueActor {
     pub task_actor: Addr<TaskActor>,
     pub own_addr: Option<Addr<Self>>,
+    pub settings: Settings,
 }
 
 impl Actor for QueueActor {
@@ -18,7 +20,6 @@ impl Actor for QueueActor {
     }
 }
 
-
 impl Handler<NewTask> for QueueActor {
     type Result = ();
 
@@ -29,7 +30,6 @@ impl Handler<NewTask> for QueueActor {
     }
 }
 
-
 impl Handler<TaskCompleted> for QueueActor {
     type Result = ();
 
@@ -37,7 +37,6 @@ impl Handler<TaskCompleted> for QueueActor {
         info!("Finished task: {}", message.command);
     }
 }
-
 
 impl QueueActor {
     fn dispatch_task(&mut self, new_task: NewTask) {

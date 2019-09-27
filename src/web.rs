@@ -7,10 +7,12 @@ use ::std::collections::HashMap;
 use crate::messages::NewTask;
 use crate::queue_actor::QueueActor;
 use crate::template::verify_template_parameters;
+use crate::settings::Settings;
 
 /// State of the actix-web application
 struct AppState {
     queue_actor: Addr<QueueActor>,
+    settings: Settings,
 }
 
 /// Index route
@@ -43,15 +45,17 @@ fn webhook(
 /// Initialize the web server
 /// Move the address of the queue actor inside the AppState for further dispatch
 /// of tasks to the actor
-pub fn init_web_server(queue_actor: Addr<QueueActor>) {
+pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
+    let settings_for_app = settings.clone();
     HttpServer::new(move || {
         App::new()
             .data(AppState {
                 queue_actor: queue_actor.clone(),
+                settings: settings_for_app.clone(),
             })
-            .service(web::resource("/webhook/{webhook_name}").to(webhook))
+            .service(web::resource("/{webhook_name}").to(webhook))
     })
-    .bind("127.0.0.1:8000")
+    .bind(format!("{}:{}", settings.domain, settings.port))
     .unwrap()
     .start();
 }

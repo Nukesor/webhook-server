@@ -1,6 +1,6 @@
 use ::actix::prelude::*;
 use ::log::info;
-use ::subprocess::{Exec, Redirection, CaptureData, ExitStatus};
+use ::subprocess::{CaptureData, Exec, ExitStatus, Redirection};
 
 use crate::messages::*;
 use crate::queue_actor::QueueActor;
@@ -35,19 +35,15 @@ impl Handler<StartTask> for TaskActor {
             }
             Err(error) => {
                 info!("Error during task execution: {}", error);
-                return
-            },
+                return;
+            }
         }
 
         match captured_data.exit_status {
-            ExitStatus::Exited(exit_code) => {
-            },
-            ExitStatus::Signaled(signal) => {
-            },
-            ExitStatus::Other(other) => {
-            },
-            ExitStatus::Undetermined => {
-            },
+            ExitStatus::Exited(_exit_code) => {}
+            ExitStatus::Signaled(_signal) => {}
+            ExitStatus::Other(_other) => {}
+            ExitStatus::Undetermined => {}
         }
 
         let output = captured_data.stdout_str();

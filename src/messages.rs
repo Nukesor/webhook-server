@@ -21,5 +21,6 @@ pub struct StartTask {
 pub struct TaskCompleted {
     pub command: String,
     pub cwd: String,
+    pub exit_code: i32,
     pub queue_actor: Addr<QueueActor>,
 }
