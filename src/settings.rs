@@ -60,7 +60,9 @@ impl Settings {
     /// Get a specific webhook from the
     pub fn get_webhook_by_name(&self, name: String) -> Result<Webhook, HttpResponse> {
         for webhook in self.webhooks.iter() {
-            return Ok(webhook.clone());
+            if webhook.name == name {
+                return Ok(webhook.clone());
+            }
         }
 
         Err(HttpResponse::build(StatusCode::BAD_REQUEST)
