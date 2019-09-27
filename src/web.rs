@@ -5,7 +5,7 @@ use ::log::info;
 use ::std::collections::HashMap;
 
 use crate::queue_actor::QueueActor;
-use crate::settings::{Settings, get_task_from_request};
+use crate::settings::{get_task_from_request, Settings};
 
 /// State of the actix-web application
 struct AppState {
@@ -35,7 +35,6 @@ fn webhook(
     Ok(HttpResponse::Ok().finish())
 }
 
-
 /// Initialize the web server
 /// Move the address of the queue actor inside the AppState for further dispatch
 /// of tasks to the actor
@@ -53,4 +52,3 @@ pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
     .unwrap()
     .start();
 }
-

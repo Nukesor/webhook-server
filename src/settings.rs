@@ -1,24 +1,22 @@
-use ::config::*;
-use ::serde::Deserialize;
-use ::shellexpand::tilde;
-use ::std::path::Path;
-use ::std::env::current_dir;
 use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
+use ::config::*;
 use ::handlebars::Handlebars;
 use ::log::info;
+use ::serde::Deserialize;
+use ::shellexpand::tilde;
 use ::std::collections::HashMap;
+use ::std::path::Path;
 
 use crate::messages::NewTask;
-
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Webhook {
     name: String,
     command: String,
+    cwd: String,
     parallel_processes: i32,
 }
-
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -28,7 +26,6 @@ pub struct Settings {
     pub workers: usize,
     pub webhooks: Vec<Webhook>,
 }
-
 
 impl Clone for Settings {
     fn clone(&self) -> Self {
@@ -45,7 +42,6 @@ impl Clone for Settings {
         }
     }
 }
-
 
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
@@ -67,10 +63,10 @@ impl Settings {
             return Ok(webhook.clone());
         }
 
-        Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("Couldn't find webhook with name: {}", name)))
+        Err(HttpResponse::build(StatusCode::BAD_REQUEST)
+            .json(format!("Couldn't find webhook with name: {}", name)))
     }
 }
-
 
 fn parse_config(mut settings: Config) -> Config {
     let config_paths = [
@@ -78,7 +74,6 @@ fn parse_config(mut settings: Config) -> Config {
         &tilde("~/.config/webhook_server.yml").into_owned(),
         "./webhook_server.yml",
     ];
-    info!("Current directory {}", current_dir().unwrap().display());
     info!("Parsing config files");
 
     for path in config_paths.into_iter() {
@@ -92,8 +87,11 @@ fn parse_config(mut settings: Config) -> Config {
     settings
 }
 
-
-pub fn get_task_from_request(settings: &Settings, name: String, params: HashMap<String, String>) -> Result<NewTask, HttpResponse> {
+pub fn get_task_from_request(
+    settings: &Settings,
+    name: String,
+    params: HashMap<String, String>,
+) -> Result<NewTask, HttpResponse> {
     let webhook = settings.get_webhook_by_name(name)?;
 
     let command = verify_template_parameters(webhook.command, &params)?;
@@ -101,10 +99,10 @@ pub fn get_task_from_request(settings: &Settings, name: String, params: HashMap<
     Ok(NewTask {
         name: webhook.name,
         parameters: params,
+        cwd: webhook.cwd,
         command: command,
     })
 }
-
 
 /// Verify that the template renders with the given parameters
 pub fn verify_template_parameters(

@@ -6,5 +6,6 @@ webhooks:
   -
     name: 'ls'
     command: '/bin/ls {{param1}} {{param2}}'
+    cwd: '/home/nuke'
     mode: ''
     parallel_processes: 2

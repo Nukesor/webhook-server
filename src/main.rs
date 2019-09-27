@@ -1,17 +1,17 @@
-mod settings;
 mod messages;
 mod queue_actor;
+mod settings;
 mod task_actor;
 mod web;
 
 use ::actix::prelude::*;
-use ::simplelog::{Config, LevelFilter, SimpleLogger};
 use ::log::error;
+use ::simplelog::{Config, LevelFilter, SimpleLogger};
 
 use crate::queue_actor::QueueActor;
+use crate::settings::Settings;
 use crate::task_actor::TaskActor;
 use crate::web::init_web_server;
-use crate::settings::Settings;
 
 fn main() {
     let sys = System::new("webhook-server");
@@ -22,7 +22,7 @@ fn main() {
     match settings_result {
         Ok(value) => {
             settings = value;
-        },
+        }
         Err(err) => {
             error!("{:?}", err);
             return;

@@ -7,6 +7,7 @@ use crate::queue_actor::QueueActor;
 pub struct NewTask {
     pub name: String,
     pub parameters: HashMap<String, String>,
+    pub cwd: String,
     pub command: String,
 }
 

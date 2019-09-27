@@ -2,8 +2,8 @@ use ::actix::prelude::*;
 use ::log::info;
 
 use crate::messages::*;
-use crate::task_actor::TaskActor;
 use crate::settings::Settings;
+use crate::task_actor::TaskActor;
 
 pub struct QueueActor {
     pub task_actor: Addr<TaskActor>,
@@ -44,7 +44,7 @@ impl QueueActor {
 
         let start_task = StartTask {
             command: new_task.command,
-            cwd: "/".to_string(),
+            cwd: new_task.cwd,
             queue_actor: addr,
         };
 
