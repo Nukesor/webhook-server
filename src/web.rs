@@ -4,10 +4,8 @@ use ::actix_web::*;
 use ::log::info;
 use ::std::collections::HashMap;
 
-use crate::messages::NewTask;
 use crate::queue_actor::QueueActor;
-use crate::template::verify_template_parameters;
-use crate::settings::Settings;
+use crate::settings::{Settings, get_task_from_request};
 
 /// State of the actix-web application
 struct AppState {
@@ -27,20 +25,16 @@ fn webhook(
 
     info!("");
     info!("Incoming webhook for \"{}\":", webhook_name);
-    let command = verify_template_parameters("ls {{rofl}}".to_string(), &params)?;
 
     // Create a new task with the checked parameters and webhook name
-    let new_task = NewTask {
-        name: webhook_name,
-        parameters: params,
-        command: command,
-    };
+    let new_task = get_task_from_request(&data.settings, webhook_name, params)?;
 
     // Send the task to the actor managing the queue
     data.queue_actor.do_send(new_task);
 
     Ok(HttpResponse::Ok().finish())
 }
+
 
 /// Initialize the web server
 /// Move the address of the queue actor inside the AppState for further dispatch
@@ -59,3 +53,4 @@ pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
     .unwrap()
     .start();
 }
+

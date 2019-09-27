@@ -2,11 +2,11 @@ mod settings;
 mod messages;
 mod queue_actor;
 mod task_actor;
-mod template;
 mod web;
 
 use ::actix::prelude::*;
 use ::simplelog::{Config, LevelFilter, SimpleLogger};
+use ::log::error;
 
 use crate::queue_actor::QueueActor;
 use crate::task_actor::TaskActor;
@@ -15,7 +15,19 @@ use crate::settings::Settings;
 
 fn main() {
     let sys = System::new("webhook-server");
-    let settings = Settings::new().unwrap();
+    let _ = SimpleLogger::init(LevelFilter::Info, Config::default());
+    let settings_result = Settings::new();
+
+    let settings: Settings;
+    match settings_result {
+        Ok(value) => {
+            settings = value;
+        },
+        Err(err) => {
+            error!("{:?}", err);
+            return;
+        }
+    }
 
     // Create actix actors and path the reference of the task_actor to the queue_actor
     // The queue_actor will send it's own address in the StartTask payload for bidirectional communication
@@ -25,8 +37,6 @@ fn main() {
         own_addr: None,
         settings: settings.clone(),
     };
-
-    let _ = SimpleLogger::init(LevelFilter::Info, Config::default());
 
     init_web_server(queue_actor.start(), settings);
 
