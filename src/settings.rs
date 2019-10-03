@@ -23,6 +23,7 @@ pub struct Settings {
     pub domain: String,
     pub port: i32,
     pub ssh_cert: Option<String>,
+    pub secret: Option<String>,
     pub workers: usize,
     pub webhooks: Vec<Webhook>,
 }
@@ -36,6 +37,7 @@ impl Clone for Settings {
         Settings {
             domain: self.domain.clone(),
             port: self.port,
+            secret: self.secret.clone(),
             ssh_cert: self.ssh_cert.clone(),
             workers: self.workers,
             webhooks: webhooks,
@@ -92,15 +94,16 @@ fn parse_config(mut settings: Config) -> Config {
 pub fn get_task_from_request(
     settings: &Settings,
     name: String,
-    params: HashMap<String, String>,
+    parameters : Option<HashMap<String, String>>,
 ) -> Result<NewTask, HttpResponse> {
-    let webhook = settings.get_webhook_by_name(name)?;
+    let parameters = parameters.unwrap_or_default();
 
-    let command = verify_template_parameters(webhook.command, &params)?;
+    let webhook = settings.get_webhook_by_name(name)?;
+    let command = verify_template_parameters(webhook.command, &parameters)?;
 
     Ok(NewTask {
         name: webhook.name,
-        parameters: params,
+        parameters: parameters,
         cwd: webhook.cwd,
         command: command,
     })
@@ -109,15 +112,15 @@ pub fn get_task_from_request(
 /// Verify that the template renders with the given parameters
 pub fn verify_template_parameters(
     template: String,
-    params: &HashMap<String, String>,
+    parameters: &HashMap<String, String>,
 ) -> Result<String, HttpResponse> {
-    info!("Got parameters: {:?}", params);
+    info!("Got parameters: {:?}", parameters);
     // Create a new handlebar instance and enable strict mode to prevent missing or malformed arguments
     let mut handlebars = Handlebars::new();
     handlebars.set_strict_mode(true);
 
     // Check the template for render errors with the current parameter
-    let result = handlebars.render_template(&template, params);
+    let result = handlebars.render_template(&template, parameters);
     match result {
         Err(error) => {
             Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("{:?}", error)))

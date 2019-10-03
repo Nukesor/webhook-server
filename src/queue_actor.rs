@@ -9,6 +9,7 @@ pub struct QueueActor {
     pub task_actor: Addr<TaskActor>,
     pub own_addr: Option<Addr<Self>>,
     pub settings: Settings,
+    pub current_workers: i32,
 }
 
 impl Actor for QueueActor {
@@ -39,6 +40,18 @@ impl Handler<TaskCompleted> for QueueActor {
 }
 
 impl QueueActor {
+    pub fn new(
+        task_actor:  Addr<TaskActor>,
+        settings: Settings,
+    ) -> Self {
+        QueueActor {
+            task_actor: task_actor.clone(),
+            own_addr: None,
+            settings: settings.clone(),
+            current_workers: 0,
+        }
+    }
+
     fn dispatch_task(&mut self, new_task: NewTask) {
         let addr = self.own_addr.as_ref().unwrap().clone();
 

@@ -32,11 +32,10 @@ fn main() {
     // Create actix actors and path the reference of the task_actor to the queue_actor
     // The queue_actor will send it's own address in the StartTask payload for bidirectional communication
     let task_actor = SyncArbiter::start(settings.workers, move || TaskActor { queue_actor: None });
-    let queue_actor = QueueActor {
-        task_actor: task_actor.clone(),
-        own_addr: None,
-        settings: settings.clone(),
-    };
+    let queue_actor = QueueActor::new(
+        task_actor.clone(),
+        settings.clone(),
+    );
 
     init_web_server(queue_actor.start(), settings);
 
