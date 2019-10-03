@@ -1,0 +1,13 @@
+[Unit]
+Description=Starting webhook task executor
+After=network.target
+
+[Service]
+ExecStart=/bin/webhook-server
+Restart=always
+User=your_user
+StandardOutput=file:/var/log/webhook/webhook.log
+StandardError=file:/var/log/webhook/webhook_err.log
+
+[Install]
+WantedBy=multi-user.target
