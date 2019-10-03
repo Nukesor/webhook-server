@@ -40,10 +40,7 @@ impl Handler<TaskCompleted> for QueueActor {
 }
 
 impl QueueActor {
-    pub fn new(
-        task_actor:  Addr<TaskActor>,
-        settings: Settings,
-    ) -> Self {
+    pub fn new(task_actor: Addr<TaskActor>, settings: Settings) -> Self {
         QueueActor {
             task_actor: task_actor.clone(),
             own_addr: None,

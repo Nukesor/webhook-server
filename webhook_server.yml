@@ -2,7 +2,10 @@ domain: 127.0.0.1
 port: 8000
 ssh_cert: null
 workers: 10
-secret: 'thisisasecret'
+secret: '72558847d57c22a2f19d711537cdc446'
+basic_auth_user: null
+basic_auth_password: null
+basic_auth_and_secret: true
 webhooks:
   -
     name: 'ls'

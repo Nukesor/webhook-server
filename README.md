@@ -25,7 +25,7 @@ An example config file can be found in the `webhook_server.yml` file of the repo
 - `workers (4)` The amount of workers for parallel webhook processing. If you plan on processing a LOT of requests or triggering long running task, increase the worker count.
 - `basic_auth_user (null)` Your user if you want to do basic auth. Check the `Building a request` section for more information on basic_auth headers
 - `basic_auth_password (null)` Your password if you want to do basic auth.
-- `secret (null)` A secret for authentication via payload signature verification. Check the `Building a request` section for more information on signature headers.
+- `secret (null)` A hex secret for authentication via payload signature verification. Check the `Building a request` section for more information on signature headers. Can be, for instance, be created with `hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/random`
 - `basic_auth_and_secret (false)` If false, only require BasicAuth OR signature authentication. This is necessary, if you want to interact with Github's webhooks while using BasicAuth (they don't support BasicAuth).
 - `webhooks` A list of webhooks. Such a webhook looks like this:
 
@@ -44,11 +44,13 @@ An example config file can be found in the `webhook_server.yml` file of the repo
 ## Buildling a request
 
 Webhook server accepts json encoded POST requests.  
-This is an example request issued with `httpie`:
+This is an example request issued with `httpie` and a secret of `72558847d57c22a2f19d711537cdc446`:
 
-    echo '{"parameters": {"param1": "-al","param2": "/tmp"}}' | http POST localhost:8000/ls \
-        Signature:'0e77ff25ef9f02952c6e61cc4211cbfd016d740e' \
+```
+echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:8000/ls \
+        Signature:'e8c87b736b2c385979cddb8a4a425de77b6b4640' \
         Authorization:'Basic d2ViaG9vazp0aGlzaXNhcGFzc3dvcmQ='
+```
 
 **Payload:**
 

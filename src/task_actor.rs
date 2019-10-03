@@ -1,5 +1,5 @@
 use ::actix::prelude::*;
-use ::log::{warn,info};
+use ::log::{info, warn};
 use ::subprocess::{CaptureData, Exec, ExitStatus, Redirection};
 
 use crate::messages::*;

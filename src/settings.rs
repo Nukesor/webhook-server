@@ -2,7 +2,8 @@ use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
 use ::config::*;
 use ::handlebars::Handlebars;
-use ::log::{info,warn};
+use ::hex::decode;
+use ::log::{info, warn};
 use ::serde::Deserialize;
 use ::shellexpand::tilde;
 use ::std::collections::HashMap;
@@ -24,6 +25,9 @@ pub struct Settings {
     pub port: i32,
     pub ssh_cert: Option<String>,
     pub secret: Option<String>,
+    pub basic_auth_user: Option<String>,
+    pub basic_auth_password: Option<String>,
+    pub basic_auth_and_secret: bool,
     pub workers: usize,
     pub webhooks: Vec<Webhook>,
 }
@@ -37,8 +41,11 @@ impl Clone for Settings {
         Settings {
             domain: self.domain.clone(),
             port: self.port,
-            secret: self.secret.clone(),
             ssh_cert: self.ssh_cert.clone(),
+            secret: self.secret.clone(),
+            basic_auth_user: self.basic_auth_user.clone(),
+            basic_auth_password: self.basic_auth_password.clone(),
+            basic_auth_and_secret: self.basic_auth_and_secret,
             workers: self.workers,
             webhooks: webhooks,
         }
@@ -46,17 +53,44 @@ impl Clone for Settings {
 }
 
 impl Settings {
-    pub fn new() -> Result<Self, ConfigError> {
+    pub fn new() -> Self {
         info!("Init settings file");
         let mut settings = config::Config::default();
-        settings.set_default("domain", "127.0.0.1")?;
-        settings.set_default("port", "8000")?;
-        settings.set_default("ssh_cert", None::<String>)?;
-        settings.set_default("workers", 8)?;
+        settings.set_default("domain", "127.0.0.1").unwrap();
+        settings.set_default("port", "8000").unwrap();
+        settings.set_default("ssh_cert", None::<String>).unwrap();
+        settings.set_default("workers", 8).unwrap();
+        settings.set_default("secret", None::<String>).unwrap();
+        settings
+            .set_default("basic_auth_user", None::<String>)
+            .unwrap();
+        settings
+            .set_default("basic_auth_password", None::<String>)
+            .unwrap();
+        settings
+            .set_default("basic_auth_and_secret", false)
+            .unwrap();
 
         settings = parse_config(settings);
+        let settings: Settings = match settings.try_into() {
+            Ok(settings) => settings,
+            Err(err) => {
+                panic!("Error parsing settings: {:?}", err);
+            }
+        };
 
-        settings.try_into()
+        //        if settings.basic_auth_and_secret && (settings.secret.is_empty() || settings.basic_auth_user.is_empty() || settings.basic_auth_password.is_empty()) {
+        //            panic!("If basic_auth_and_secret is true, all three values must be specified in your config");
+        //        }
+
+        // Verify that the settings secret is a valid hex string and save the decoded string for easier usage
+        if let Some(secret) = settings.secret.clone() {
+            if let Err(error) = decode(&secret) {
+                panic!("Secret must be a hex string: {}, {}", secret, error);
+            }
+        }
+
+        settings
     }
 
     /// Get a specific webhook from the
@@ -95,7 +129,7 @@ fn parse_config(mut settings: Config) -> Config {
 pub fn get_task_from_request(
     settings: &Settings,
     name: String,
-    parameters : Option<HashMap<String, String>>,
+    parameters: Option<HashMap<String, String>>,
 ) -> Result<NewTask, HttpResponse> {
     let parameters = parameters.unwrap_or_default();
 
@@ -124,7 +158,10 @@ pub fn verify_template_parameters(
     let result = handlebars.render_template(&template, parameters);
     match result {
         Err(error) => {
-            warn!("Error rendering comand with params: {:?}. Error: {:?}", parameters, error);
+            warn!(
+                "Error rendering comand with params: {:?}. Error: {:?}",
+                parameters, error
+            );
             Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("{:?}", error)))
         }
         Ok(result) => {
