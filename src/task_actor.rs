@@ -1,5 +1,5 @@
 use ::actix::prelude::*;
-use ::log::info;
+use ::log::{warn,info};
 use ::subprocess::{CaptureData, Exec, ExitStatus, Redirection};
 
 use crate::messages::*;
@@ -34,7 +34,7 @@ impl Handler<StartTask> for TaskActor {
                 captured_data = data;
             }
             Err(error) => {
-                info!("Error during task execution: {}", error);
+                warn!("Error during task execution: {}", error);
                 return;
             }
         }

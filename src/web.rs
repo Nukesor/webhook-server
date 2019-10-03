@@ -2,7 +2,7 @@ use ::actix::prelude::*;
 use ::actix_web::*;
 use ::serde::Deserialize;
 
-use ::log::info;
+use ::log::{info,warn};
 use ::std::collections::HashMap;
 
 use crate::queue_actor::QueueActor;
@@ -68,11 +68,15 @@ fn verify_secret(payload: &Payload, data: &web::Data<AppState>) -> Result<(), Ht
             if *payload_secret == secret {
                 return Ok(())
             }
+            warn!("Wrong secret: {}, parameters: {:?}", payload_secret, payload.parameters);
             Err(HttpResponse::Unauthorized()
                 .body("Wrong secret"))
         },
-        None => Err(HttpResponse::Unauthorized()
-            .body("No secret specified"))
+        None => {
+            warn!("Call with no secret: {:?}", payload.parameters);
+            Err(HttpResponse::Unauthorized()
+                .body("No secret specified"))
+        }
     }
 }
 

@@ -2,7 +2,7 @@ use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
 use ::config::*;
 use ::handlebars::Handlebars;
-use ::log::info;
+use ::log::{info,warn};
 use ::serde::Deserialize;
 use ::shellexpand::tilde;
 use ::std::collections::HashMap;
@@ -67,8 +67,9 @@ impl Settings {
             }
         }
 
-        Err(HttpResponse::build(StatusCode::BAD_REQUEST)
-            .json(format!("Couldn't find webhook with name: {}", name)))
+        let error = format!("Couldn't find webhook with name: {}", name);
+        warn!("{}", error);
+        Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(error))
     }
 }
 
@@ -123,6 +124,7 @@ pub fn verify_template_parameters(
     let result = handlebars.render_template(&template, parameters);
     match result {
         Err(error) => {
+            warn!("Error rendering comand with params: {:?}. Error: {:?}", parameters, error);
             Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("{:?}", error)))
         }
         Ok(result) => {
