@@ -57,12 +57,12 @@ fn webhook(
 
     let webhook_name = path_info.into_inner();
 
-    info!("");
-    info!("Incoming webhook for \"{}\":", webhook_name);
-    info!("Got payload: {}", parsed_payload);
-
     // Check the credentials and signature headers of the request
     verify_authentication_header(&data.settings, &request, &body, parsed_payload.to_string())?;
+
+    info!("");
+    info!("Incoming webhook for \"{}\":", webhook_name);
+    //debug!("Got payload: {}", parsed_payload);
 
     // Create a new task with the checked parameters and webhook name
     let new_task = get_task_from_request(&data.settings, webhook_name, payload.parameters)?;
