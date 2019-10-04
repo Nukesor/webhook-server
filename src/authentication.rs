@@ -4,7 +4,6 @@ use ::hex;
 use ::hmac::{Hmac, Mac};
 use ::log::warn;
 use ::sha1::Sha1;
-use ::std::str;
 
 use crate::settings::Settings;
 
@@ -65,7 +64,16 @@ fn get_signature_header(headers: &HeaderMap) -> Result<String, HttpResponse> {
     };
 
     match header.to_str() {
-        Ok(header) => Ok(header.to_string()),
+        Ok(header) => {
+            // Header must be formatted like this: sha1={{hash}}
+            let mut header = header.to_string();
+            if !header.starts_with("sha1=") {
+                Err(HttpResponse::Unauthorized()
+                    .body("Error while parsing signature: Couldn't find prefix"))
+            } else {
+                Ok(header.split_off(5))
+            }
+        },
         Err(error) => {
             Err(HttpResponse::Unauthorized()
                 .body(format!("Error while parsing signature: {}", error)))

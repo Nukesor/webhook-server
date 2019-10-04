@@ -26,7 +26,7 @@ An example config file can be found in the `webhook_server.yml` file of the repo
 - `basic_auth_user (null)` Your user if you want to do basic auth. Check the `Building a request` section for more information on basic_auth headers
 - `basic_auth_password (null)` Your password if you want to do basic auth.
 - `secret (null)` A hex secret for authentication via payload signature verification. Check the `Building a request` section for more information on signature headers. Can be, for instance, be created with `hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/random`
-- `basic_auth_and_secret (false)` If false, only require BasicAuth OR signature authentication. This is necessary, if you want to interact with Github's webhooks while using BasicAuth (they don't support BasicAuth).
+- `basic_auth_and_secret (false)` By default it's only required to authenticate via BasicAuth OR signature authentication. If you want to be super safe, set this to true to require both.
 - `webhooks` A list of webhooks. Such a webhook looks like this:
 
 ```
@@ -48,7 +48,7 @@ This is an example request issued with `httpie` and a secret of `72558847d57c22a
 
 ```
 echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:8000/ls \
-        Signature:'e8c87b736b2c385979cddb8a4a425de77b6b4640' \
+        Signature:'sha1=e8c87b736b2c385979cddb8a4a425de77b6b4640' \
         Authorization:'Basic d2ViaG9vazp0aGlzaXNhcGFzc3dvcmQ='
 ```
 
