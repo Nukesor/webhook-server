@@ -98,10 +98,7 @@ fn verify_signature_header(signature: String, secret: String, body: &web::Bytes,
     };
 
     // Generate the own hmac sha1 from the secret and body and verify that it's identical to the signature
-    let secret_bytes = match hex::decode(secret) {
-        Ok(secret_bytes) => secret_bytes,
-        Err(_) => panic!("Invalid secret. This cannot happen."),
-    };
+    let secret_bytes = secret.into_bytes();
     let expected_signature = generate_signature_sha1(&secret_bytes, body).result();
 
     let valid = crypto::util::fixed_time_eq(expected_signature.code(), &signature_bytes);
