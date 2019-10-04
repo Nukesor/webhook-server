@@ -2,7 +2,7 @@ use ::actix_web::http::header::{HeaderMap, HeaderValue};
 use ::actix_web::*;
 use ::hex;
 use ::hmac::{Hmac, Mac};
-use ::log::warn;
+use ::log::{warn, debug};
 use ::sha1::Sha1;
 
 use crate::settings::Settings;
@@ -100,6 +100,9 @@ fn verify_signature_header(signature: String, secret: String, body: &web::Bytes,
         Ok(secret_bytes) => secret_bytes,
         Err(_) => panic!("Invalid secret. This cannot happen."),
     };
+    let hmac = generate_signature_sha1(&secret_bytes, body);
+    debug!("Our sha1: {}", hex::encode(hmac.result().code().as_slice()));
+
     let hmac = generate_signature_sha1(&secret_bytes, body);
     match hmac.verify(&signature_bytes) {
         Ok(()) => Ok(()),

@@ -2,7 +2,7 @@ use ::actix::prelude::*;
 use ::actix_web::*;
 use ::serde::Deserialize;
 use ::serde_json;
-use ::log::{info, warn};
+use ::log::{info, warn, debug};
 use ::std::str;
 use ::std::collections::HashMap;
 
@@ -62,7 +62,7 @@ fn webhook(
 
     info!("");
     info!("Incoming webhook for \"{}\":", webhook_name);
-    //debug!("Got payload: {}", parsed_payload);
+    debug!("Got payload: {}", parsed_payload);
 
     // Create a new task with the checked parameters and webhook name
     let new_task = get_task_from_request(&data.settings, webhook_name, payload.parameters)?;
