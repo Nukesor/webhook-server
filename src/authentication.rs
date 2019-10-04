@@ -1,9 +1,11 @@
+use ::crypto;
+use ::crypto::hmac::Hmac;
+use ::crypto::mac::Mac;
+use ::crypto::sha1::Sha1;
 use ::actix_web::http::header::{HeaderMap, HeaderValue};
 use ::actix_web::*;
 use ::hex;
-use ::hmac::{Hmac, Mac};
-use ::log::{warn, debug};
-use ::sha1::Sha1;
+use ::log::{warn, info};
 
 use crate::settings::Settings;
 
@@ -100,27 +102,23 @@ fn verify_signature_header(signature: String, secret: String, body: &web::Bytes,
         Ok(secret_bytes) => secret_bytes,
         Err(_) => panic!("Invalid secret. This cannot happen."),
     };
-    let hmac = generate_signature_sha1(&secret_bytes, body);
-    debug!("Our sha1: {}", hex::encode(hmac.result().code().as_slice()));
+    let expected_signature = generate_signature_sha1(&secret_bytes, body).result();
 
-    let hmac = generate_signature_sha1(&secret_bytes, body);
-    match hmac.verify(&signature_bytes) {
-        Ok(()) => Ok(()),
-        Err(_) => {
-            warn!(
-                "Got wrong sha1: {} \nwith payload: {}",
-                signature, parsed_body
-            );
-            Err(HttpResponse::Unauthorized().body("Invalid sha1 signature"))
-        }
+    let valid = crypto::util::fixed_time_eq(expected_signature.code(), &signature_bytes);
+    if !valid {
+        warn!("Got wrong sha1: {}\nWith payload: {}", signature, parsed_body);
+        info!("Our sha1: {}", hex::encode(expected_signature.code()));
+        return Err(HttpResponse::Unauthorized().body("Invalid sha1 signature"));
     }
+
+    Ok(())
 }
 
 /// Create a hmac SHA1 instance from a secret and body
-fn generate_signature_sha1(secret_bytes: &Vec<u8>, body: &web::Bytes) -> HmacSha1 {
-    let mut hmac =
-        HmacSha1::new_varkey(secret_bytes).expect("Couldn't create hmac with current secret");
-    hmac.input(&body);
+fn generate_signature_sha1(secret_bytes: &Vec<u8>, body: &web::Bytes) -> Hmac<Sha1> {
+    let digest = Sha1::new();
+    let mut hmac = Hmac::new(digest, secret_bytes);
+    hmac.input(body);
 
     hmac
 }

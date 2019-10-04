@@ -15,7 +15,7 @@ use crate::web::init_web_server;
 
 fn main() {
     let sys = System::new("webhook-server");
-    let _ = SimpleLogger::init(LevelFilter::Debug, Config::default());
+    let _ = SimpleLogger::init(LevelFilter::Info, Config::default());
     let settings = Settings::new();
 
     // Create actix actors and path the reference of the task_actor to the queue_actor
