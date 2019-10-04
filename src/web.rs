@@ -44,17 +44,25 @@ fn webhook(
     data: web::Data<AppState>,
     path_info: web::Path<String>,
     request: web::HttpRequest,
-    body: String,
+    body: web::Bytes,
 ) -> Result<HttpResponse, HttpResponse> {
+
     let payload = get_payload(&body)?;
+    let parsed_payload = match str::from_utf8(&body) {
+        Ok(parsed) => parsed,
+        Err(_) => {
+            return Err(HttpResponse::Unauthorized().body("Couldn't parse body"));
+        }
+    };
+
     let webhook_name = path_info.into_inner();
 
     info!("");
     info!("Incoming webhook for \"{}\":", webhook_name);
-    info!("Got payload: {}", body);
+    info!("Got payload: {}", parsed_payload);
 
     // Check the credentials and signature headers of the request
-    verify_authentication_header(&data.settings, &request, body)?;
+    verify_authentication_header(&data.settings, &request, &body, parsed_payload.to_string())?;
 
     // Create a new task with the checked parameters and webhook name
     let new_task = get_task_from_request(&data.settings, webhook_name, payload.parameters)?;
@@ -67,8 +75,8 @@ fn webhook(
 
 
 /// We do our own json handling, since Actix doesn't allow multiple extractors at once
-fn get_payload(string: &String) -> Result<Payload, HttpResponse> {
-    match serde_json::from_str(&string) {
+fn get_payload(body: &web::Bytes) -> Result<Payload, HttpResponse> {
+    match serde_json::from_slice(body) {
         Ok(payload) => Ok(payload),
         Err(error) => {
             let message = format!("Json error: {}", error);
