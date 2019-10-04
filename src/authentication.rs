@@ -106,8 +106,8 @@ fn verify_signature_header(signature: String, secret: String, body: &web::Bytes,
 
     let valid = crypto::util::fixed_time_eq(expected_signature.code(), &signature_bytes);
     if !valid {
-        warn!("Got wrong sha1: {}\nWith payload: {}", signature, parsed_body);
         info!("Our sha1: {}", hex::encode(expected_signature.code()));
+        warn!("Got wrong sha1: {}\nWith payload: {}", signature, parsed_body);
         return Err(HttpResponse::Unauthorized().body("Invalid sha1 signature"));
     }
 
