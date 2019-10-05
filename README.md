@@ -25,7 +25,7 @@ An example config file can be found in the `webhook_server.yml` file of the repo
 - `workers (4)` The amount of workers for parallel webhook processing. If you plan on processing a LOT of requests or triggering long running task, increase the worker count.
 - `basic_auth_user (null)` Your user if you want to do basic auth. Check the `Building a request` section for more information on basic_auth headers
 - `basic_auth_password (null)` Your password if you want to do basic auth.
-- `secret (null)` A hex secret for authentication via payload signature verification. Check the `Building a request` section for more information on signature headers. Can be, for instance, be created with `hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/random`
+- `secret (null)` A secret for authentication via payload signature verification. Check the `Building a request` section for more information on signature headers. Can be, for instance, be created with `pwgen 25 1`
 - `basic_auth_and_secret (false)` By default it's only required to authenticate via BasicAuth OR signature authentication. If you want to be super safe, set this to true to require both.
 - `webhooks` A list of webhooks. Such a webhook looks like this:
 
@@ -48,7 +48,7 @@ This is an example request issued with `httpie` and a secret of `72558847d57c22a
 
 ```
 echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:8000/ls \
-        Signature:'sha1=e8c87b736b2c385979cddb8a4a425de77b6b4640' \
+        Signature:'sha1=d762407ca7fb309dfbeb73c080caf6394751f0a4' \
         Authorization:'Basic d2ViaG9vazp0aGlzaXNhcGFzc3dvcmQ='
 ```
 
@@ -74,8 +74,8 @@ This would result in the execution of `ls -al /tmp` by the server.
 **Headers:**
 
 - `Authorization`: If `basic_auth.username` and `basic_auth.password` is specified, this should be the standard `base64` encoded authorization header.
-- `Signature:` If you specify a secret, the content of the signature is the HMAC of the json payload with the secret as key.
-    This procedure is based on Github's webhook secret system.
+- `Signature:` If you specify a secret, the content of the signature is the HMAC of the json payload with the UTF8-encoded secret as key.
+    This procedure is based on Github's webhook secret system. (Github says to use a hex key, but they interpret it as UTF8 -.-)
     Python example: `hmac.new(key, payload, hashlib.sha1)`  
     Ruby example: `OpenSSL::HMAC.hexdigest("SHA256", key, payload)`
 - `X-Hub-Signature`: This is the default of Github's webhooks and is a fallback, if `Signature` is not specified.

@@ -1,5 +1,6 @@
 use ::actix::prelude::*;
 use ::actix_web::*;
+use ::actix_web::http::header::HeaderMap;
 use ::serde::Deserialize;
 use ::serde_json;
 use ::log::{info, warn, debug};
@@ -49,6 +50,7 @@ fn webhook(
 
     let body: Vec<u8> = body.to_vec();
     let payload = get_payload(&body)?;
+    let headers = get_headers_hash_map(request.headers())?;
     let parsed_payload = match str::from_utf8(&body) {
         Ok(parsed) => parsed,
         Err(_) => {
@@ -59,7 +61,7 @@ fn webhook(
     let webhook_name = path_info.into_inner();
 
     // Check the credentials and signature headers of the request
-    verify_authentication_header(&data.settings, &request, &body, parsed_payload.to_string())?;
+    verify_authentication_header(&data.settings, &headers, &body, parsed_payload.to_string())?;
 
     info!("");
     info!("Incoming webhook for \"{}\":", webhook_name);
@@ -85,4 +87,28 @@ fn get_payload(body: &Vec<u8>) -> Result<Payload, HttpResponse> {
             Err(HttpResponse::Unauthorized().body(message))
         }
     }
+}
+
+
+fn get_headers_hash_map(map: &HeaderMap) -> Result<HashMap<String, String>, HttpResponse> {
+    let mut headers = HashMap::new();
+
+    for (key, header_value) in map.iter() {
+        let key = key.as_str().to_string();
+        let value: String;
+        match header_value.to_str() {
+            Ok(header_value) => {
+                value = header_value.to_string()
+            },
+            Err(error) => {
+                let message = format!("Couldn't parse header: {}", error);
+                warn!("{}", message);
+                return Err(HttpResponse::Unauthorized().body(message));
+            }
+        };
+
+        headers.insert(key, value);
+    }
+
+    Ok(headers)
 }

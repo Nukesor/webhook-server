@@ -1,4 +1,4 @@
-use ::actix_web::http::header::{HeaderMap, HeaderValue};
+use ::std::collections::HashMap;
 use ::actix_web::*;
 use ::hex;
 use ::hmac::{Hmac, Mac};
@@ -11,7 +11,7 @@ type HmacSha1 = Hmac<Sha1>;
 
 pub fn verify_authentication_header(
     settings: &Settings,
-    request: &HttpRequest,
+    headers: &HashMap<String, String>,
     body: &Vec<u8>,
     parsed_body: String,
 ) -> Result<(), HttpResponse> {
@@ -34,7 +34,7 @@ pub fn verify_authentication_header(
 
     // Check for a correct signature, if we have as secret or both authentication methods are required
     if has_secret || check_both {
-        let signature = get_signature_header(&request.headers())?;
+        let signature = get_signature_header(headers)?;
         if !signature.is_empty() {
             verify_signature_header(signature, secret, body, parsed_body)?;
         } else if check_both {
@@ -49,36 +49,25 @@ pub fn verify_authentication_header(
 /// Extract the correct signature header content from all headers
 /// It's possible to receive the signature from multiple Headers, since Github uses their own
 /// Header name for their signature method.
-fn get_signature_header(headers: &HeaderMap) -> Result<String, HttpResponse> {
-    let header: &HeaderValue;
-    if headers.contains_key("signature") {
-        header = headers
-            .get("signature")
-            .expect("Error while extracting signature header");
-    } else if headers.contains_key("X-Hub-Signature") {
-        header = headers
-            .get("X-Hub-Signature")
-            .expect("Error while extracting github signature header");
+fn get_signature_header(headers: &HashMap<String, String>) -> Result<String, HttpResponse> {
+    let mut header = headers.get("signature");
+    if header.is_none() {
+        header = headers.get("X-Hub-Signature");
+    }
+
+    // We dont' find any headers for signatures and this method is not required
+    let mut header = if let Some(header) = header {
+        header.clone()
     } else {
-        // We dont' find any headers for signatures and this method is not required
         return Ok("".to_string());
     };
 
-    match header.to_str() {
-        Ok(header) => {
-            // Header must be formatted like this: sha1={{hash}}
-            let mut header = header.to_string();
-            if !header.starts_with("sha1=") {
-                Err(HttpResponse::Unauthorized()
-                    .body("Error while parsing signature: Couldn't find prefix"))
-            } else {
-                Ok(header.split_off(5))
-            }
-        },
-        Err(error) => {
-            Err(HttpResponse::Unauthorized()
-                .body(format!("Error while parsing signature: {}", error)))
-        }
+    // Header must be formatted like this: sha1={{hash}}
+    if !header.starts_with("sha1=") {
+        Err(HttpResponse::Unauthorized()
+            .body("Error while parsing signature: Couldn't find prefix"))
+    } else {
+        Ok(header.split_off(5))
     }
 }
 
