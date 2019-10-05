@@ -85,6 +85,16 @@ This would result in the execution of `ls -al /tmp` by the server.
 ## Security
 
 **Code injection:**
+When compiling dynamic commands with templating, you make yourself vulnerable to code injection, since the compiled commands are executed by the system shell.
+If you plan on using templating and publicly exposing your service, please use some kind of authentication.
 
-If you compile dynamic commands with templating, you make yourself vulnerable to code injection, since the compiled commands are executed by the system shell.
-It's always a good idea to use a secret, but if you plan on using templating and publicly exposing your service, **please to use basic auth, secrets or even better both**.
+1. You can use a secret (Github's authentication method). This method is a bit annoying to set up, if you write your own implementation though.
+2. You can use basic auth.
+3. If you want to be super safe, you can require both authentication methods
+
+
+**SSL:**
+Especially when using Basic Auth or templating it's highly recommended to use SSL encryption.
+Otherwise your Credentials or your template payload can be leaked.
+
+Using the signature header without receiving any payloads should be safe, but it's still recommended to use SSL for encryption.
