@@ -44,12 +44,12 @@ An example config file can be found in the `webhook_server.yml` file of the repo
 ## Buildling a request
 
 Webhook server accepts json encoded POST requests.  
-This is an example request issued with `httpie` and a secret of `72558847d57c22a2f19d711537cdc446`:
+This is an example request issued with `httpie` and a secret of `72558847d57c22a2f19d711537cdc446` and `test:testtest` basic auth credentials:
 
 ```
 echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:8000/ls \
         Signature:'sha1=d762407ca7fb309dfbeb73c080caf6394751f0a4' \
-        Authorization:'Basic d2ViaG9vazp0aGlzaXNhcGFzc3dvcmQ='
+        Authorization:'Basic GVzdDp0ZXN0dGVzdA=='
 ```
 
 **Payload:**
@@ -73,9 +73,10 @@ This would result in the execution of `ls -al /tmp` by the server.
 
 **Headers:**
 
-- `Authorization`: If `basic_auth.username` and `basic_auth.password` is specified, this should be the standard `base64` encoded authorization header.
+- `Authorization`: If `basic_auth_username` and `basic_auth_password` is specified, this should be the standard `base64` encoded authorization header.
 - `Signature:` If you specify a secret, the content of the signature is the HMAC of the json payload with the UTF8-encoded secret as key.
     This procedure is based on Github's webhook secret system. (Github says to use a hex key, but they interpret it as UTF8 -.-)
+
     Python example: `hmac.new(key, payload, hashlib.sha1)`  
     Ruby example: `OpenSSL::HMAC.hexdigest("SHA256", key, payload)`
 - `X-Hub-Signature`: This is the default of Github's webhooks and is a fallback, if `Signature` is not specified.
