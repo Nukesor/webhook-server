@@ -77,7 +77,7 @@ This would result in the execution of `ls -al /tmp` by the server.
 - `Signature:` If you specify a secret, the content of the signature is the HMAC of the json payload with the UTF8-encoded secret as key.
     This procedure is based on Github's webhook secret system. (Github says to use a hex key, but they interpret it as UTF8 -.-)  
     Python example: `hmac.new(key, payload, hashlib.sha1)`  
-    Ruby example: `OpenSSL::HMAC.hexdigest("SHA256", key, payload)`
+    Ruby example: `OpenSSL::HMAC.hexdigest("SHA1", key, payload)`
 - `X-Hub-Signature`: This is the default of Github's webhooks and is a fallback, if `Signature` is not specified.
 
 
