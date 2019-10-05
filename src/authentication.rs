@@ -1,3 +1,4 @@
+use base64;
 use ::std::collections::HashMap;
 use ::actix_web::*;
 use ::hex;
@@ -15,9 +16,6 @@ pub fn verify_authentication_header(
     body: &Vec<u8>,
     parsed_body: String,
 ) -> Result<(), HttpResponse> {
-    // Check whether need both methods for authorization to work
-    let check_both = settings.basic_auth_and_secret;
-
     // Extract the existing secret from the settings
     let secret = settings.secret.clone().unwrap_or_default();
     let has_secret = !secret.is_empty();
@@ -27,21 +25,35 @@ pub fn verify_authentication_header(
     let password = settings.basic_auth_password.clone().unwrap_or_default();
     let has_basic_auth = !user.is_empty() && !password.is_empty();
 
+    // Check whether authentication is needed and whether we need both methods for authorization to work
+    let authentication_required = has_basic_auth || has_secret;
+    let check_both = settings.basic_auth_and_secret;
+
     // We don't need any authentication, return early
-    if !has_secret && !has_basic_auth {
+    if !authentication_required {
         return Ok(());
     }
+
+    let mut signature_valid = false;
 
     // Check for a correct signature, if we have as secret or both authentication methods are required
     if has_secret || check_both {
         let signature = get_signature_header(headers)?;
         if !signature.is_empty() {
             verify_signature_header(signature, secret, body, parsed_body)?;
+            signature_valid = true;
         } else if check_both {
             // The signature header is required and couldn't be found
             return Err(HttpResponse::Unauthorized().body("No signature header found"));
         }
     }
+
+    // We only need one authentication method and the signature was valid
+    if !check_both && signature_valid {
+        return Ok(());
+    }
+
+    verify_basic_auth_header(headers, settings)?;
 
     Ok(())
 }
@@ -104,4 +116,51 @@ fn generate_signature_sha1(secret_bytes: &Vec<u8>, body: &Vec<u8>) -> HmacSha1 {
         HmacSha1::new_varkey(secret_bytes).expect("Couldn't create hmac with current secret");
     hmac.input(body);
     hmac
+}
+
+
+// Verify the basic_auth header
+fn verify_basic_auth_header(headers: &HashMap<String, String>, settings: &Settings) -> Result<(), HttpResponse> {
+    let header = headers.get("authorization");
+    // We dont' find any headers for signatures and this method is not required
+    let mut header = if let Some(header) = header {
+        header.clone()
+    } else {
+        return Err(HttpResponse::Unauthorized().finish());
+    };
+
+    // Header must be formatted like this: `Basic {{base64_string}}`
+    if !header.starts_with("Basic ") {
+        return Err(HttpResponse::Unauthorized()
+            .body("Error while parsing signature: Couldn't find Basic prefix"));
+    }
+    let token = header.split_off(6);
+
+    // Decode base64 string to bytes
+    let token = if let Ok(token) = base64::decode(&token) {
+        token
+    } else {
+        return Err(HttpResponse::Unauthorized().body("Malformed base64"));
+    };
+
+    // Interpret bytes as UTF8
+    let token = if let Ok(token) = std::str::from_utf8(&token) {
+        token.to_string()
+    } else {
+        return Err(HttpResponse::Unauthorized().body("Invalid utf8 token"));
+    };
+
+    let credentials: Vec<&str> = token.split(':').collect();
+    if credentials.len() != 2 {
+        return Err(HttpResponse::Unauthorized().body("Malformed credential string"));
+    }
+
+    let user = settings.basic_auth_user.clone().unwrap_or_default();
+    let password = settings.basic_auth_password.clone().unwrap_or_default();
+
+    if user != credentials[0] || password != credentials[1] {
+        return Err(HttpResponse::Unauthorized().finish());
+    }
+
+    Ok(())
 }
