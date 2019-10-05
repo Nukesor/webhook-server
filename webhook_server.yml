@@ -1,6 +1,7 @@
 domain: 127.0.0.1
 port: 8000
-ssh_cert: null
+ssl_private_key: null
+ssl_cert_chain: null
 workers: 10
 secret: '72558847d57c22a2f19d711537cdc446'
 basic_auth_user: "test"

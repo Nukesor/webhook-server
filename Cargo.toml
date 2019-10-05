@@ -7,9 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = "1.0"
+actix-web = { version = "1", features = ["ssl"] }
 actix = "0.8"
 handlebars = "2.0"
+openssl = "0.10"
 
 config = "0.9"
 log = "0.4"

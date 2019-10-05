@@ -23,7 +23,8 @@ pub struct Webhook {
 pub struct Settings {
     pub domain: String,
     pub port: i32,
-    pub ssh_cert: Option<String>,
+    pub ssl_private_key: Option<String>,
+    pub ssl_cert_chain: Option<String>,
     pub secret: Option<String>,
     pub basic_auth_user: Option<String>,
     pub basic_auth_password: Option<String>,
@@ -41,7 +42,8 @@ impl Clone for Settings {
         Settings {
             domain: self.domain.clone(),
             port: self.port,
-            ssh_cert: self.ssh_cert.clone(),
+            ssl_private_key: self.ssl_private_key.clone(),
+            ssl_cert_chain: self.ssl_cert_chain.clone(),
             secret: self.secret.clone(),
             basic_auth_user: self.basic_auth_user.clone(),
             basic_auth_password: self.basic_auth_password.clone(),
@@ -58,7 +60,8 @@ impl Settings {
         let mut settings = config::Config::default();
         settings.set_default("domain", "127.0.0.1").unwrap();
         settings.set_default("port", "8000").unwrap();
-        settings.set_default("ssh_cert", None::<String>).unwrap();
+        settings.set_default("ssl_private_key", None::<String>).unwrap();
+        settings.set_default("ssl_cert_chain", None::<String>).unwrap();
         settings.set_default("workers", 8).unwrap();
         settings.set_default("secret", None::<String>).unwrap();
         settings

@@ -2,10 +2,12 @@ use ::actix::prelude::*;
 use ::actix_web::http::header::HeaderMap;
 use ::actix_web::*;
 use ::log::{debug, info, warn};
+use ::openssl::ssl::{SslAcceptor, SslFiletype, SslMethod, SslAcceptorBuilder};
 use ::serde::Deserialize;
 use ::serde_json;
 use ::std::collections::HashMap;
 use ::std::str;
+use ::std::path::Path;
 
 use crate::authentication::verify_authentication_header;
 use crate::queue_actor::QueueActor;
@@ -16,17 +18,28 @@ use crate::settings::{get_task_from_request, Settings};
 /// of tasks to the actor
 pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
     let settings_for_app = settings.clone();
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         App::new()
             .data(AppState {
                 queue_actor: queue_actor.clone(),
                 settings: settings_for_app.clone(),
             })
             .service(web::resource("/{webhook_name}").route(web::post().to(webhook)))
-    })
-    .bind(format!("{}:{}", settings.domain, settings.port))
-    .unwrap()
-    .start();
+    });
+
+    let address = format!("{}:{}", settings.domain, settings.port);
+
+    // Load the ssl key, if something is specified in the settings
+    if settings.ssl_cert_chain.is_some() && settings.ssl_private_key.is_some() {
+        let builder = get_ssl_builder(&settings);
+        server.bind_ssl(address, builder)
+            .unwrap()
+            .start();
+    } else {
+        server.bind(address)
+            .unwrap()
+            .start();
+    }
 }
 
 /// State of the actix-web application
@@ -106,4 +119,28 @@ fn get_headers_hash_map(map: &HeaderMap) -> Result<HashMap<String, String>, Http
     }
 
     Ok(headers)
+}
+
+
+fn get_ssl_builder(settings: &Settings) -> SslAcceptorBuilder {
+    info!("Initializing SSL");
+    // At this point we already know that these have to be Some, thereby just unwrap
+    let private_path_str = settings.ssl_private_key.clone().unwrap();
+    let cert_path_str = settings.ssl_cert_chain.clone().unwrap();
+
+    // Ensure both files exist
+    let private_path = Path::new(&private_path_str);
+    let cert_path = Path::new(&cert_path_str);
+    if !private_path.exists() {
+        panic!("Path to private key file is not correct: {}", private_path_str)
+    }
+    if !cert_path.exists() {
+        panic!("Path to cert chain file is not correct: {}", cert_path_str)
+    }
+
+    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    builder.set_private_key_file(private_path, SslFiletype::PEM).unwrap();
+    builder.set_certificate_chain_file(cert_path).unwrap();
+
+    builder
 }
