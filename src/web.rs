@@ -47,6 +47,7 @@ fn webhook(
     body: web::Bytes,
 ) -> Result<HttpResponse, HttpResponse> {
 
+    let body: Vec<u8> = body.to_vec();
     let payload = get_payload(&body)?;
     let parsed_payload = match str::from_utf8(&body) {
         Ok(parsed) => parsed,
@@ -75,7 +76,7 @@ fn webhook(
 
 
 /// We do our own json handling, since Actix doesn't allow multiple extractors at once
-fn get_payload(body: &web::Bytes) -> Result<Payload, HttpResponse> {
+fn get_payload(body: &Vec<u8>) -> Result<Payload, HttpResponse> {
     match serde_json::from_slice(body) {
         Ok(payload) => Ok(payload),
         Err(error) => {
