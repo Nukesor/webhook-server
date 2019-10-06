@@ -63,7 +63,7 @@ pub fn verify_authentication_header(
 fn get_signature_header(headers: &HashMap<String, String>) -> Result<String, HttpResponse> {
     let mut header = headers.get("signature");
     if header.is_none() {
-        header = headers.get("X-Hub-Signature");
+        header = headers.get("x-hub-signature");
     }
 
     // We dont' find any headers for signatures and this method is not required
