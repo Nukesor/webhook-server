@@ -48,7 +48,7 @@ struct AppState {
     settings: Settings,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct Payload {
     parameters: Option<HashMap<String, String>>,
 }
@@ -63,21 +63,15 @@ fn webhook(
     let body: Vec<u8> = body.to_vec();
     let payload = get_payload(&body)?;
     let headers = get_headers_hash_map(request.headers())?;
-    let parsed_payload = match str::from_utf8(&body) {
-        Ok(parsed) => parsed,
-        Err(_) => {
-            return Err(HttpResponse::Unauthorized().body("Couldn't parse body"));
-        }
-    };
 
     let webhook_name = path_info.into_inner();
 
     // Check the credentials and signature headers of the request
-    verify_authentication_header(&data.settings, &headers, &body, parsed_payload.to_string())?;
+    verify_authentication_header(&data.settings, &headers, &body)?;
 
     info!("");
     info!("Incoming webhook for \"{}\":", webhook_name);
-    debug!("Got payload: {}", parsed_payload);
+    debug!("Got payload: {:?}", payload);
 
     // Create a new task with the checked parameters and webhook name
     let new_task = get_task_from_request(&data.settings, webhook_name, payload.parameters)?;

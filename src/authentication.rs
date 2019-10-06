@@ -14,7 +14,6 @@ pub fn verify_authentication_header(
     settings: &Settings,
     headers: &HashMap<String, String>,
     body: &Vec<u8>,
-    parsed_body: String,
 ) -> Result<(), HttpResponse> {
     // Extract the existing secret from the settings
     let secret = settings.secret.clone().unwrap_or_default();
@@ -40,7 +39,7 @@ pub fn verify_authentication_header(
     if has_secret || check_both {
         let signature = get_signature_header(headers)?;
         if !signature.is_empty() {
-            verify_signature_header(signature, secret, body, parsed_body)?;
+            verify_signature_header(signature, secret, body)?;
             signature_valid = true;
         } else if check_both {
             // The signature header is required and couldn't be found
@@ -89,7 +88,6 @@ fn verify_signature_header(
     signature: String,
     secret: String,
     body: &Vec<u8>,
-    parsed_body: String,
 ) -> Result<(), HttpResponse> {
     // Try to decode the sha1 into bytes. Should be a valid hex string
     let signature_bytes = match hex::decode(&signature) {
@@ -111,10 +109,7 @@ fn verify_signature_header(
                 "Our sha1: {}",
                 hex::encode(expected_signature.result().code())
             );
-            warn!(
-                "Got wrong sha1: {}\nWith payload: {}",
-                signature, parsed_body
-            );
+            warn!("Got wrong sha1: {}", signature);
             Err(HttpResponse::Unauthorized().body("Invalid sha1 signature"))
         }
     }
@@ -134,11 +129,13 @@ fn verify_basic_auth_header(
     settings: &Settings,
 ) -> Result<(), HttpResponse> {
     let header = headers.get("authorization");
-    // We dont' find any headers for signatures and this method is not required
+    // Check whether we can find a Basic Auth header. It's required at this point
     let mut header = if let Some(header) = header {
         header.clone()
     } else {
-        return Err(HttpResponse::Unauthorized().finish());
+        return Err(HttpResponse::Unauthorized()
+            .set_header(http::header::WWW_AUTHENTICATE, "Basic")
+            .finish());
     };
 
     // Header must be formatted like this: `Basic {{base64_string}}`

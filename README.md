@@ -49,7 +49,7 @@ This is an example request issued with `httpie` and a secret of `72558847d57c22a
 ```
 echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:8000/ls \
         Signature:'sha1=d762407ca7fb309dfbeb73c080caf6394751f0a4' \
-        Authorization:'Basic GVzdDp0ZXN0dGVzdA=='
+        Authorization:'Basic dGVzdDp0ZXN0dGVzdA=='
 ```
 
 **Payload:**
@@ -98,3 +98,6 @@ Especially when using Basic Auth or templating it's highly recommended to use SS
 Otherwise your Credentials or your template payload can be leaked.
 
 Using the signature header without receiving any payloads should be safe, but it's still recommended to use SSL for encryption.
+
+An example cert and key can be created like this `openssl req -nodes -new -x509 -keyout test.pem -out test.pem`
+If you need a password function for the private key, please create an issue.
