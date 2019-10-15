@@ -1,4 +1,4 @@
-use ::actix_web::*;
+use ::actix_web::{HttpResponse, http};
 use ::hex;
 use ::hmac::{Hmac, Mac};
 use ::log::warn;
@@ -75,6 +75,7 @@ fn get_signature_header(headers: &HashMap<String, String>) -> Result<String, Htt
 
     // Header must be formatted like this: sha1={{hash}}
     if !header.starts_with("sha1=") {
+        warn!("Got request with missing sha1= prefix");
         Err(HttpResponse::Unauthorized()
             .body("Error while parsing signature: Couldn't find prefix"))
     } else {
@@ -133,6 +134,7 @@ fn verify_basic_auth_header(
     let mut header = if let Some(header) = header {
         header.clone()
     } else {
+        warn!("Send basic auth browser request");
         return Err(HttpResponse::Unauthorized()
             .set_header(http::header::WWW_AUTHENTICATE, "Basic")
             .finish());
@@ -140,6 +142,7 @@ fn verify_basic_auth_header(
 
     // Header must be formatted like this: `Basic {{base64_string}}`
     if !header.starts_with("Basic ") {
+        warn!("Got request with missing basic prefix");
         return Err(HttpResponse::Unauthorized()
             .body("Error while parsing signature: Couldn't find Basic prefix"));
     }
@@ -149,6 +152,7 @@ fn verify_basic_auth_header(
     let token = if let Ok(token) = base64::decode(&token) {
         token
     } else {
+        warn!("Got request with malformed base64");
         return Err(HttpResponse::Unauthorized().body("Malformed base64"));
     };
 
@@ -156,11 +160,13 @@ fn verify_basic_auth_header(
     let token = if let Ok(token) = std::str::from_utf8(&token) {
         token.to_string()
     } else {
+        warn!("Got request with non utf8 token");
         return Err(HttpResponse::Unauthorized().body("Invalid utf8 token"));
     };
 
     let credentials: Vec<&str> = token.split(':').collect();
     if credentials.len() != 2 {
+        warn!("Got request with malformed credential string");
         return Err(HttpResponse::Unauthorized().body("Malformed credential string"));
     }
 
@@ -168,8 +174,78 @@ fn verify_basic_auth_header(
     let password = settings.basic_auth_password.clone().unwrap_or_default();
 
     if user != credentials[0] || password != credentials[1] {
+        warn!("Got invalid base64 credentials");
         return Err(HttpResponse::Unauthorized().finish());
     }
 
     Ok(())
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn setup_args() -> (Settings, HashMap<String, String>, Vec<u8>) {
+        let settings = Settings {
+            domain: String::new(),
+            port: 8000,
+            ssl_private_key: None,
+            ssl_cert_chain: None,
+            secret: Some("A secret string".to_string()),
+            basic_auth_user: None,
+            basic_auth_password: None,
+            basic_auth_and_secret: false,
+            workers: 8,
+            webhooks: Vec::new(),
+        };
+
+        let headers = HashMap::new();
+
+        (settings, headers, "{\"test\": \"A test body\"}".as_bytes().to_vec())
+    }
+
+    fn add_signature_header(
+        settings: &Settings,
+        headers: &mut HashMap<String, String>,
+        body: &Vec<u8>,
+    ) {
+        let hmac = generate_signature_sha1(&settings.secret.clone().unwrap().into_bytes(), body);
+        let prefix = "sha1=".to_string();
+        headers.insert("signature".to_string(), prefix + &hex::encode(hmac.result().code()));
+    }
+
+    #[test]
+    /// Signature authentication should work
+    fn test_valid_signature() {
+        let (settings, mut headers, body) = setup_args();
+        add_signature_header(&settings, &mut headers, &body);
+        assert!(verify_authentication_header(&settings, &headers, &body).is_ok());
+    }
+
+    #[test]
+    /// Ensure that signature authentication also works with Github's header
+    fn test_valid_github_signature() {
+        let (settings, mut headers, body) = setup_args();
+        add_signature_header(&settings, &mut headers, &body);
+        let signature = headers.remove("signature").unwrap();
+        headers.insert("x-hub-signature".to_string(), signature);
+        assert!(verify_authentication_header(&settings, &headers, &body).is_ok());
+    }
+
+    #[test]
+    /// Requests fail if signature authentication is required, but no header is specified
+    fn test_no_signature() {
+        let (settings, headers, body) = setup_args();
+        assert!(verify_authentication_header(&settings, &headers, &body).is_err());
+    }
+
+    #[test]
+    /// Requests fail if signature authentication is required, while providing an invalid sha1
+    fn test_invalid_signature() {
+        let (settings, mut headers, body) = setup_args();
+        headers.insert("signature".to_string(), "sha1=a68ccdf08e2767a8307c8cda67a77f4046cb9e17".to_string());
+        assert!(verify_authentication_header(&settings, &headers, &body).is_err());
+    }
 }
