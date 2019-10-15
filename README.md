@@ -52,6 +52,14 @@ echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:
         Authorization:'Basic dGVzdDp0ZXN0dGVzdA=='
 ```
 
+
+If you don't need templating, you can also send a simple GET request:
+
+```
+http GET localhost:8000/ls Authorization:'Basic dGVzdDp0ZXN0dGVzdA=='
+```
+
+
 **Payload:**
 
 The payload is a simple JSON encoded dictionary, with a single entry `parameters`, which contains a dictionary with all parameters necessary for rendering the template.

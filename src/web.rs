@@ -1,5 +1,6 @@
 use ::actix::prelude::*;
 use ::actix_web::http::header::HeaderMap;
+use ::actix_web::http::Method;
 use ::actix_web::*;
 use ::log::{debug, info, warn};
 use ::openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
@@ -24,7 +25,7 @@ pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
                 queue_actor: queue_actor.clone(),
                 settings: settings_for_app.clone(),
             })
-            .service(web::resource("/{webhook_name}").route(web::post().to(webhook)))
+            .service(web::resource("/{webhook_name}").to(webhook))
     });
 
     let address = format!("{}:{}", settings.domain, settings.port);
@@ -44,7 +45,7 @@ struct AppState {
     settings: Settings,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 struct Payload {
     parameters: Option<HashMap<String, String>>,
 }
@@ -57,7 +58,15 @@ fn webhook(
     body: web::Bytes,
 ) -> Result<HttpResponse, HttpResponse> {
     let body: Vec<u8> = body.to_vec();
-    let payload = get_payload(&body)?;
+    let payload: Payload;
+    match request.method() {
+        &Method::POST => {
+            payload = get_payload(&body)?;
+        },
+        _ => {
+            payload = Payload::default();
+        },
+    }
     let headers = get_headers_hash_map(request.headers())?;
 
     let webhook_name = path_info.into_inner();
