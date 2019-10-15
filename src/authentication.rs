@@ -216,6 +216,16 @@ mod tests {
         headers.insert("signature".to_string(), prefix + &hex::encode(hmac.result().code()));
     }
 
+    fn add_basic_auth_header(headers: &mut HashMap<String, String>) {
+        let basic_header = format!("TestUser:TestPassword").into_bytes();
+        headers.insert("authorization".to_string(), "Basic ".to_string() + &base64::encode(&basic_header));
+    }
+
+    fn populate_base_auth_credentials(settings: &mut Settings) {
+        settings.basic_auth_user = Some("TestUser".to_string());
+        settings.basic_auth_password = Some("TestPassword".to_string());
+    }
+
     #[test]
     /// Signature authentication should work
     fn test_valid_signature() {
@@ -246,6 +256,61 @@ mod tests {
     fn test_invalid_signature() {
         let (settings, mut headers, body) = setup_args();
         headers.insert("signature".to_string(), "sha1=a68ccdf08e2767a8307c8cda67a77f4046cb9e17".to_string());
+        assert!(verify_authentication_header(&settings, &headers, &body).is_err());
+    }
+
+    #[test]
+    /// Authentication fails, if both methods are required and only signature is provided
+    fn test_valid_basic_auth() {
+        let (mut settings, mut headers, body) = setup_args();
+        populate_base_auth_credentials(&mut settings);
+
+        add_basic_auth_header(&mut headers);
+        assert!(verify_authentication_header(&settings, &headers, &body).is_ok());
+    }
+
+    #[test]
+    /// Authentication fails, if basic auth is required and invalid credentials are provided
+    fn test_invalid_basic_auth() {
+        let (mut settings, mut headers, body) = setup_args();
+        settings.secret = None;
+        populate_base_auth_credentials(&mut settings);
+
+        headers.insert("authorization".to_string(), "Basic cm9mbDpyb2Zs".to_string());
+        assert!(verify_authentication_header(&settings, &headers, &body).is_err());
+    }
+
+    #[test]
+    /// Authentication works if both methods are required and provided
+    fn test_both_required_working() {
+        let (mut settings, mut headers, body) = setup_args();
+        settings.basic_auth_and_secret = true;
+        populate_base_auth_credentials(&mut settings);
+
+        add_basic_auth_header(&mut headers);
+        add_signature_header(&settings, &mut headers, &body);
+        assert!(verify_authentication_header(&settings, &headers, &body).is_ok());
+    }
+
+    #[test]
+    /// Authentication fails, if both methods are required and only signature is provided
+    fn test_both_required_signature_provided() {
+        let (mut settings, mut headers, body) = setup_args();
+        settings.basic_auth_and_secret = true;
+        populate_base_auth_credentials(&mut settings);
+
+        add_signature_header(&settings, &mut headers, &body);
+        assert!(verify_authentication_header(&settings, &headers, &body).is_err());
+    }
+
+    #[test]
+    /// Authentication fails, if both methods are required and only basic auth is provided
+    fn test_both_required_basic_auth_provided() {
+        let (mut settings, mut headers, body) = setup_args();
+        settings.basic_auth_and_secret = true;
+        populate_base_auth_credentials(&mut settings);
+
+        add_basic_auth_header(&mut headers);
         assert!(verify_authentication_header(&settings, &headers, &body).is_err());
     }
 }
