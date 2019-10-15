@@ -2,12 +2,12 @@ use ::actix::prelude::*;
 use ::actix_web::http::header::HeaderMap;
 use ::actix_web::*;
 use ::log::{debug, info, warn};
-use ::openssl::ssl::{SslAcceptor, SslFiletype, SslMethod, SslAcceptorBuilder};
+use ::openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
 use ::serde::Deserialize;
 use ::serde_json;
 use ::std::collections::HashMap;
-use ::std::str;
 use ::std::path::Path;
+use ::std::str;
 
 use crate::authentication::verify_authentication_header;
 use crate::queue_actor::QueueActor;
@@ -32,13 +32,9 @@ pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
     // Load the ssl key, if something is specified in the settings
     if settings.ssl_cert_chain.is_some() && settings.ssl_private_key.is_some() {
         let builder = get_ssl_builder(&settings);
-        server.bind_ssl(address, builder)
-            .unwrap()
-            .start();
+        server.bind_ssl(address, builder).unwrap().start();
     } else {
-        server.bind(address)
-            .unwrap()
-            .start();
+        server.bind(address).unwrap().start();
     }
 }
 
@@ -115,7 +111,6 @@ fn get_headers_hash_map(map: &HeaderMap) -> Result<HashMap<String, String>, Http
     Ok(headers)
 }
 
-
 fn get_ssl_builder(settings: &Settings) -> SslAcceptorBuilder {
     info!("Initializing SSL");
     // At this point we already know that these have to be Some, thereby just unwrap
@@ -126,14 +121,19 @@ fn get_ssl_builder(settings: &Settings) -> SslAcceptorBuilder {
     let private_path = Path::new(&private_path_str);
     let cert_path = Path::new(&cert_path_str);
     if !private_path.exists() {
-        panic!("Path to private key file is not correct: {}", private_path_str)
+        panic!(
+            "Path to private key file is not correct: {}",
+            private_path_str
+        )
     }
     if !cert_path.exists() {
         panic!("Path to cert chain file is not correct: {}", cert_path_str)
     }
 
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    builder.set_private_key_file(private_path, SslFiletype::PEM).unwrap();
+    builder
+        .set_private_key_file(private_path, SslFiletype::PEM)
+        .unwrap();
     builder.set_certificate_chain_file(cert_path).unwrap();
 
     builder

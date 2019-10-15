@@ -1,4 +1,4 @@
-use ::actix_web::{HttpResponse, http};
+use ::actix_web::{http, HttpResponse};
 use ::hex;
 use ::hmac::{Hmac, Mac};
 use ::log::warn;
@@ -181,8 +181,6 @@ fn verify_basic_auth_header(
     Ok(())
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -203,7 +201,11 @@ mod tests {
 
         let headers = HashMap::new();
 
-        (settings, headers, "{\"test\": \"A test body\"}".as_bytes().to_vec())
+        (
+            settings,
+            headers,
+            "{\"test\": \"A test body\"}".as_bytes().to_vec(),
+        )
     }
 
     fn add_signature_header(
@@ -213,12 +215,18 @@ mod tests {
     ) {
         let hmac = generate_signature_sha1(&settings.secret.clone().unwrap().into_bytes(), body);
         let prefix = "sha1=".to_string();
-        headers.insert("signature".to_string(), prefix + &hex::encode(hmac.result().code()));
+        headers.insert(
+            "signature".to_string(),
+            prefix + &hex::encode(hmac.result().code()),
+        );
     }
 
     fn add_basic_auth_header(headers: &mut HashMap<String, String>) {
         let basic_header = format!("TestUser:TestPassword").into_bytes();
-        headers.insert("authorization".to_string(), "Basic ".to_string() + &base64::encode(&basic_header));
+        headers.insert(
+            "authorization".to_string(),
+            "Basic ".to_string() + &base64::encode(&basic_header),
+        );
     }
 
     fn populate_base_auth_credentials(settings: &mut Settings) {
@@ -255,7 +263,10 @@ mod tests {
     /// Requests fail if signature authentication is required, while providing an invalid sha1
     fn test_invalid_signature() {
         let (settings, mut headers, body) = setup_args();
-        headers.insert("signature".to_string(), "sha1=a68ccdf08e2767a8307c8cda67a77f4046cb9e17".to_string());
+        headers.insert(
+            "signature".to_string(),
+            "sha1=a68ccdf08e2767a8307c8cda67a77f4046cb9e17".to_string(),
+        );
         assert!(verify_authentication_header(&settings, &headers, &body).is_err());
     }
 
@@ -276,7 +287,10 @@ mod tests {
         settings.secret = None;
         populate_base_auth_credentials(&mut settings);
 
-        headers.insert("authorization".to_string(), "Basic cm9mbDpyb2Zs".to_string());
+        headers.insert(
+            "authorization".to_string(),
+            "Basic cm9mbDpyb2Zs".to_string(),
+        );
         assert!(verify_authentication_header(&settings, &headers, &body).is_err());
     }
 

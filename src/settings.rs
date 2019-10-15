@@ -60,8 +60,12 @@ impl Settings {
         let mut settings = config::Config::default();
         settings.set_default("domain", "127.0.0.1").unwrap();
         settings.set_default("port", "8000").unwrap();
-        settings.set_default("ssl_private_key", None::<String>).unwrap();
-        settings.set_default("ssl_cert_chain", None::<String>).unwrap();
+        settings
+            .set_default("ssl_private_key", None::<String>)
+            .unwrap();
+        settings
+            .set_default("ssl_cert_chain", None::<String>)
+            .unwrap();
         settings.set_default("workers", 8).unwrap();
         settings.set_default("secret", None::<String>).unwrap();
         settings
