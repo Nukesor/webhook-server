@@ -28,9 +28,10 @@ An example config file can be found in the `webhook_server.yml` file of the repo
 - `basic_auth_password (null)` Your password if you want to do basic auth.
 - `secret (null)` A secret for authentication via payload signature verification. Check the `Building a request` section for more information on signature headers. Can be, for instance, be created with `pwgen 25 1`
 - `basic_auth_and_secret (false)` By default it's only required to authenticate via BasicAuth OR signature authentication. If you want to be super safe, set this to true to require both.
-- `webhooks` A list of webhooks. Such a webhook looks like this:
+- `webhooks` A list of webhooks. The whole thing looks pretty much like this:
 
 ```
+webhooks:
   -
     name: 'ls'
     command: '/bin/ls {{param1}} {{param2}}'
@@ -41,6 +42,7 @@ An example config file can be found in the `webhook_server.yml` file of the repo
 - `name` The name of the webhook, also the endpoint that's used to trigger the webhooks. E.g. `localhost:8000/ls`.
 - `command` The command thats actually used. If you want to dynamically build the command, you can use templating parameters like `{{name_of_parameter}}`.
 - `cwd` The current working directory the command should be executed from.
+
 
 ## Building a request
 
