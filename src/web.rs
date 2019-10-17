@@ -11,18 +11,18 @@ use ::std::path::Path;
 use ::std::str;
 
 use crate::authentication::verify_authentication_header;
-use crate::queue_actor::QueueActor;
+use crate::scheduler::Scheduler;
 use crate::settings::{get_task_from_request, Settings};
 
 /// Initialize the web server
 /// Move the address of the queue actor inside the AppState for further dispatch
 /// of tasks to the actor
-pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
+pub fn init_web_server(scheduler: Addr<Scheduler>, settings: Settings) {
     let settings_for_app = settings.clone();
     let server = HttpServer::new(move || {
         App::new()
             .data(AppState {
-                queue_actor: queue_actor.clone(),
+                scheduler: scheduler.clone(),
                 settings: settings_for_app.clone(),
             })
             .service(web::resource("/{webhook_name}").to(webhook))
@@ -41,7 +41,7 @@ pub fn init_web_server(queue_actor: Addr<QueueActor>, settings: Settings) {
 
 /// State of the actix-web application
 struct AppState {
-    queue_actor: Addr<QueueActor>,
+    scheduler: Addr<Scheduler>,
     settings: Settings,
 }
 
@@ -82,7 +82,7 @@ fn webhook(
     let new_task = get_task_from_request(&data.settings, webhook_name, payload.parameters)?;
 
     // Send the task to the actor managing the queue
-    data.queue_actor.do_send(new_task);
+    data.scheduler.do_send(new_task);
 
     Ok(HttpResponse::Ok().finish())
 }

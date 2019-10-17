@@ -3,19 +3,19 @@ use ::log::{info, warn};
 use ::subprocess::{CaptureData, Exec, ExitStatus, Redirection};
 
 use crate::messages::*;
-use crate::queue_actor::QueueActor;
+use crate::scheduler::Scheduler;
 
-pub struct TaskActor {
-    pub queue_actor: Option<Addr<QueueActor>>,
+pub struct TaskExecutor {
+    pub scheduler: Option<Addr<Scheduler>>,
 }
 
-impl Actor for TaskActor {
+impl Actor for TaskExecutor {
     type Context = SyncContext<Self>;
 
     fn started(&mut self, _context: &mut Self::Context) {}
 }
 
-impl Handler<StartTask> for TaskActor {
+impl Handler<StartTask> for TaskExecutor {
     type Result = ();
 
     fn handle(&mut self, task: StartTask, _context: &mut Self::Context) {
@@ -59,6 +59,6 @@ impl Handler<StartTask> for TaskActor {
             stderr: stderr,
         };
 
-        task.queue_actor.do_send(message);
+        task.scheduler.do_send(message);
     }
 }

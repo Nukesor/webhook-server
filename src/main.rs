@@ -1,16 +1,17 @@
 mod authentication;
 mod messages;
-mod queue_actor;
+mod scheduler;
 mod settings;
-mod task_actor;
+mod task_executor;
 mod web;
+mod task_queue;
 
 use ::actix::prelude::*;
 use ::simplelog::{Config, LevelFilter, SimpleLogger};
 
-use crate::queue_actor::QueueActor;
+use crate::scheduler::Scheduler;
 use crate::settings::Settings;
-use crate::task_actor::TaskActor;
+use crate::task_executor::TaskExecutor;
 use crate::web::init_web_server;
 
 fn main() {
@@ -18,12 +19,12 @@ fn main() {
     let _ = SimpleLogger::init(LevelFilter::Info, Config::default());
     let settings = Settings::new();
 
-    // Create actix actors and path the reference of the task_actor to the queue_actor
-    // The queue_actor will send it's own address in the StartTask payload for bidirectional communication
-    let task_actor = SyncArbiter::start(settings.workers, move || TaskActor { queue_actor: None });
-    let queue_actor = QueueActor::new(task_actor.clone(), settings.clone());
+    // Create actix actors and path the reference of the task_executor to the scheduler
+    // The scheduler will send it's own address in the StartTask payload for bidirectional communication
+    let task_executor = SyncArbiter::start(settings.workers, move || TaskExecutor { scheduler: None });
+    let scheduler = Scheduler::new(task_executor.clone(), settings.clone());
 
-    init_web_server(queue_actor.start(), settings);
+    init_web_server(scheduler.start(), settings);
 
     let _ = sys.run();
 }

@@ -2,7 +2,7 @@ use ::chrono::prelude::*;
 use ::actix::prelude::*;
 use ::std::collections::HashMap;
 
-use crate::queue_actor::QueueActor;
+use crate::scheduler::Scheduler;
 
 #[derive(Message)]
 pub struct NewTask {
@@ -19,7 +19,7 @@ pub struct StartTask {
     pub task_id: usize,
     pub command: String,
     pub cwd: String,
-    pub queue_actor: Addr<QueueActor>,
+    pub scheduler: Addr<Scheduler>,
 }
 
 #[derive(Message)]

@@ -3,16 +3,16 @@ use ::log::info;
 
 use crate::messages::*;
 use crate::settings::Settings;
-use crate::task_actor::TaskActor;
+use crate::task_executor::TaskExecutor;
 
-pub struct QueueActor {
-    pub task_actor: Addr<TaskActor>,
+pub struct Scheduler {
+    pub task_executor: Addr<TaskExecutor>,
     pub own_addr: Option<Addr<Self>>,
     pub settings: Settings,
     pub current_workers: i32,
 }
 
-impl Actor for QueueActor {
+impl Actor for Scheduler {
     type Context = Context<Self>;
 
     fn started(&mut self, context: &mut Self::Context) {
@@ -21,7 +21,7 @@ impl Actor for QueueActor {
     }
 }
 
-impl Handler<NewTask> for QueueActor {
+impl Handler<NewTask> for Scheduler {
     type Result = ();
 
     fn handle(&mut self, new_task: NewTask, _context: &mut Self::Context) {
@@ -31,7 +31,7 @@ impl Handler<NewTask> for QueueActor {
     }
 }
 
-impl Handler<TaskCompleted> for QueueActor {
+impl Handler<TaskCompleted> for Scheduler {
     type Result = ();
 
     fn handle(&mut self, message: TaskCompleted, _context: &mut Self::Context) {
@@ -39,10 +39,10 @@ impl Handler<TaskCompleted> for QueueActor {
     }
 }
 
-impl QueueActor {
-    pub fn new(task_actor: Addr<TaskActor>, settings: Settings) -> Self {
-        QueueActor {
-            task_actor: task_actor.clone(),
+impl Scheduler {
+    pub fn new(task_executor: Addr<TaskExecutor>, settings: Settings) -> Self {
+        Scheduler {
+            task_executor: task_executor.clone(),
             own_addr: None,
             settings: settings.clone(),
             current_workers: 0,
@@ -57,9 +57,9 @@ impl QueueActor {
             task_id: 0,
             command: new_task.command,
             cwd: new_task.cwd,
-            queue_actor: addr,
+            scheduler: addr,
         };
 
-        self.task_actor.do_send(start_task);
+        self.task_executor.do_send(start_task);
     }
 }
