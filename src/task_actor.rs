@@ -46,8 +46,19 @@ impl Handler<StartTask> for TaskActor {
             ExitStatus::Undetermined => {}
         }
 
-        let output = captured_data.stdout_str();
+        let stdout = captured_data.stdout_str();
+        let stderr = captured_data.stderr_str();
 
-        info!("{}", output);
+        info!("{}", stdout);
+
+        let message = TaskCompleted {
+            webhook_name: task.webhook_name,
+            task_id: task.task_id,
+            exit_code: 0,
+            stdout: stdout,
+            stderr: stderr,
+        };
+
+        task.queue_actor.do_send(message);
     }
 }

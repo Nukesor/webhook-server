@@ -25,7 +25,7 @@ impl Handler<NewTask> for QueueActor {
     type Result = ();
 
     fn handle(&mut self, new_task: NewTask, _context: &mut Self::Context) {
-        info!("Got new Task: {}", new_task.name);
+        info!("Got new Task: {}", new_task.webhook_name);
 
         self.dispatch_task(new_task);
     }
@@ -35,7 +35,7 @@ impl Handler<TaskCompleted> for QueueActor {
     type Result = ();
 
     fn handle(&mut self, message: TaskCompleted, _context: &mut Self::Context) {
-        info!("Finished task: {}", message.command);
+        info!("Finished task: {} - {}", message.webhook_name, message.task_id);
     }
 }
 
@@ -53,6 +53,8 @@ impl QueueActor {
         let addr = self.own_addr.as_ref().unwrap().clone();
 
         let start_task = StartTask {
+            webhook_name: new_task.webhook_name,
+            task_id: 0,
             command: new_task.command,
             cwd: new_task.cwd,
             queue_actor: addr,

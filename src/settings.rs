@@ -1,5 +1,6 @@
 use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
+use ::chrono::prelude::*;
 use ::config::*;
 use ::handlebars::Handlebars;
 use ::hex::decode;
@@ -144,10 +145,11 @@ pub fn get_task_from_request(
     let command = verify_template_parameters(webhook.command, &parameters)?;
 
     Ok(NewTask {
-        name: webhook.name,
+        webhook_name: webhook.name,
         parameters: parameters,
         cwd: webhook.cwd,
         command: command,
+        added_at: Local::now(),
     })
 }
 
