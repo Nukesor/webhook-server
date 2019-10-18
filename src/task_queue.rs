@@ -1,7 +1,7 @@
-use ::std::collections::{HashMap, BTreeMap};
-use ::serde::Serialize;
 use ::chrono::prelude::*;
 use ::log::info;
+use ::serde::Serialize;
+use ::std::collections::{BTreeMap, HashMap};
 
 use crate::messages::NewTask;
 use crate::messages::TaskCompleted;
@@ -33,9 +33,7 @@ impl Task {
             added_at: new_task.added_at,
         }
     }
-
 }
-
 
 /// The TaskQueue represents the current state of all tasks and is also
 /// responsible for the management of these.
@@ -54,7 +52,6 @@ pub struct TaskQueue {
     running: BTreeMap<i32, Task>,
     finished: BTreeMap<i32, Task>,
 }
-
 
 impl TaskQueue {
     pub fn new(settings: Settings) -> TaskQueue {
@@ -92,19 +89,18 @@ impl TaskQueue {
         match settings.mode.as_str() {
             "single" => {
                 if *self.queued_count.get(&name).unwrap() > 0 {
-                    return
+                    return;
                 } else if *self.running_count.get(&name).unwrap() > 0 {
-                    return
+                    return;
                 }
-            },
+            }
             "deploy" => {
                 if *self.queued_count.get(&name).unwrap() > 0 {
-                    return
+                    return;
                 }
-            },
-            "parallel" => {},
+            }
+            "parallel" => {}
             _ => return,
-
         }
 
         info!("Got new Task: {}", incoming.webhook_name);
@@ -150,7 +146,7 @@ impl TaskQueue {
                         self.schedule_task(task, &mut tasks);
                         continue;
                     }
-                },
+                }
                 // Parallel can be scheduled, if there are less than the max
                 // specified parallel parallel_processes running
                 "parallel" => {
@@ -158,8 +154,8 @@ impl TaskQueue {
                         self.schedule_task(task, &mut tasks);
                         continue;
                     }
-                },
-                _ => {},
+                }
+                _ => {}
             }
 
             // Tasks couldn't be scheduled yet. Put it back into the queue

@@ -1,4 +1,3 @@
-use ::std::process;
 use ::actix::prelude::*;
 use ::actix_web::http::header::HeaderMap;
 use ::actix_web::http::Method;
@@ -9,6 +8,7 @@ use ::serde::Deserialize;
 use ::serde_json;
 use ::std::collections::HashMap;
 use ::std::path::Path;
+use ::std::process;
 use ::std::str;
 
 use crate::authentication::verify_authentication_header;
@@ -63,10 +63,10 @@ fn webhook(
     match request.method() {
         &Method::POST => {
             payload = get_payload(&body)?;
-        },
+        }
         _ => {
             payload = Payload::default();
-        },
+        }
     }
     let headers = get_headers_hash_map(request.headers())?;
 

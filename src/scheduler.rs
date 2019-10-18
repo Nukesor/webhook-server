@@ -4,7 +4,7 @@ use ::log::info;
 use crate::messages::*;
 use crate::settings::Settings;
 use crate::task_executor::TaskExecutor;
-use crate::task_queue::{TaskQueue, Task};
+use crate::task_queue::{Task, TaskQueue};
 
 pub struct Scheduler {
     pub task_executor: Addr<TaskExecutor>,
@@ -28,7 +28,6 @@ impl Handler<NewTask> for Scheduler {
 
     /// Handle a NewTask. Check whether the task can be dispatch directly
     fn handle(&mut self, new_task: NewTask, _context: &mut Self::Context) {
-
         self.task_queue.add_task(new_task);
         self.dispatch_tasks();
     }
@@ -41,7 +40,10 @@ impl Handler<TaskCompleted> for Scheduler {
     /// The response contains all process output + exit code
     /// Also check for new tasks to dispatch
     fn handle(&mut self, message: TaskCompleted, _context: &mut Self::Context) {
-        info!("Finished task: {} - {}", message.webhook_name, message.task_id);
+        info!(
+            "Finished task: {} - {}",
+            message.webhook_name, message.task_id
+        );
         self.task_queue.finish_task(message);
         self.dispatch_tasks();
     }
@@ -73,7 +75,7 @@ impl Scheduler {
                 scheduler: addr,
             };
 
-            self.task_executor.do_send(message );
+            self.task_executor.do_send(message);
         }
     }
 }

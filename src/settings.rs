@@ -1,4 +1,3 @@
-use ::std::process;
 use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
 use ::chrono::prelude::*;
@@ -9,6 +8,7 @@ use ::serde::Deserialize;
 use ::shellexpand::tilde;
 use ::std::collections::HashMap;
 use ::std::path::Path;
+use ::std::process;
 
 use crate::messages::NewTask;
 
@@ -100,19 +100,24 @@ impl Settings {
         };
 
         // Verify that everything is in place, if `basic_auth_and_secret` is activated
-        if settings.basic_auth_and_secret && (settings.secret.is_none() || settings.basic_auth_user.is_none() || settings.basic_auth_password.is_none()) {
+        if settings.basic_auth_and_secret
+            && (settings.secret.is_none()
+                || settings.basic_auth_user.is_none()
+                || settings.basic_auth_password.is_none())
+        {
             println!("If basic_auth_and_secret is true, all three values must be specified in your config");
             process::exit(1);
         }
 
         // Webhook mode must be a valid
         for webhook in &settings.webhooks {
-            if webhook.mode == "single" ||
-                webhook.mode == "deploy" ||
-                webhook.mode == "parallel" {
+            if webhook.mode == "single" || webhook.mode == "deploy" || webhook.mode == "parallel" {
                 break;
             }
-            println!("Webhook mode must be one of 'single', 'deploy' or 'parallel'. Yours: {}", webhook.name);
+            println!(
+                "Webhook mode must be one of 'single', 'deploy' or 'parallel'. Yours: {}",
+                webhook.name
+            );
             process::exit(1);
         }
 
