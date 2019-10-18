@@ -32,7 +32,7 @@ pub struct StartTask {
 pub struct TaskCompleted {
     pub webhook_name: String,
     pub task_id: i32,
-    pub exit_code: i32,
+    pub exit_code: u32,
     pub stdout: String,
     pub stderr: String,
 }

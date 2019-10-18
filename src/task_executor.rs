@@ -40,8 +40,11 @@ impl Handler<StartTask> for TaskExecutor {
             }
         }
 
+        let mut exit_code = 1;
         match captured_data.exit_status {
-            ExitStatus::Exited(_exit_code) => {}
+            ExitStatus::Exited(_exit_code) => {
+                exit_code = _exit_code;
+            }
             ExitStatus::Signaled(_signal) => {}
             ExitStatus::Other(_other) => {}
             ExitStatus::Undetermined => {}
@@ -53,7 +56,7 @@ impl Handler<StartTask> for TaskExecutor {
         let message = TaskCompleted {
             webhook_name: task.webhook_name,
             task_id: task.task_id,
-            exit_code: 0,
+            exit_code: exit_code,
             stdout: stdout,
             stderr: stderr,
         };

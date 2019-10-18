@@ -13,7 +13,7 @@ pub struct Task {
     pub task_id: i32,
     pub command: String,
     pub cwd: String,
-    pub exit_code: Option<i32>,
+    pub exit_code: Option<u32>,
     pub stdout: Option<String>,
     pub stderr: Option<String>,
     pub added_at: DateTime<Local>,
