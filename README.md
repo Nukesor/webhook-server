@@ -3,6 +3,9 @@
 Webhook server is a minimal footprint server to execute stuff on your server on requests.
 It's easy to setup and useful for custom CI and it supports Github's webhooks with secret out of the box.
 
+The server contains a scheduler an can also be used to schedule long running tasks via webhook.
+Tasks can be processed in parallel or one-by-one, the mode of execution and amount of parallel processes can be configured per webhook type.
+
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
 
 
