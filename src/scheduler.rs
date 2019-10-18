@@ -4,7 +4,7 @@ use ::log::info;
 use crate::messages::*;
 use crate::settings::Settings;
 use crate::task_executor::TaskExecutor;
-use crate::task_queue::{Task, TaskQueue};
+use crate::task_queue::TaskQueue;
 
 pub struct Scheduler {
     pub task_executor: Addr<TaskExecutor>,
@@ -20,6 +20,16 @@ impl Actor for Scheduler {
     fn started(&mut self, context: &mut Self::Context) {
         self.own_addr = Some(context.address());
         info!("Queue management actor started up");
+    }
+}
+
+impl Handler<GetQueue> for Scheduler {
+    type Result = String;
+
+    /// Handle a NewTask. Check whether the task can be dispatch directly
+    fn handle(&mut self, _message: GetQueue, _context: &mut Self::Context) -> String {
+        let json = serde_json::to_string(&self.task_queue).unwrap();
+        json
     }
 }
 

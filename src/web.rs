@@ -11,6 +11,7 @@ use ::std::path::Path;
 use ::std::process;
 use ::std::str;
 
+use crate::messages::GetQueue;
 use crate::authentication::verify_authentication_header;
 use crate::scheduler::Scheduler;
 use crate::settings::{get_task_from_request, Settings};
@@ -27,6 +28,7 @@ pub fn init_web_server(scheduler: Addr<Scheduler>, settings: Settings) {
                 settings: settings_for_app.clone(),
             })
             .service(web::resource("/{webhook_name}").to(webhook))
+            .service(web::resource("/").to(index))
     });
 
     let address = format!("{}:{}", settings.domain, settings.port);
@@ -49,6 +51,23 @@ struct AppState {
 #[derive(Deserialize, Debug, Default)]
 struct Payload {
     parameters: Option<HashMap<String, String>>,
+}
+
+/// Index route for getting current state of the server
+fn index(
+    data: web::Data<AppState>,
+    request: web::HttpRequest,
+) -> Result<HttpResponse, HttpResponse> {
+    let headers = get_headers_hash_map(request.headers())?;
+
+    // Check the credentials and signature headers of the request
+    verify_authentication_header(&data.settings, &headers, &Vec::new())?;
+
+    let json = data.scheduler.send(GetQueue{}).wait().unwrap();
+    Ok(HttpResponse::Ok()
+        .header(http::header::CONTENT_TYPE, "application/json")
+        .body(json)
+    )
 }
 
 /// Index route

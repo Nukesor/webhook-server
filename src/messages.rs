@@ -4,6 +4,12 @@ use ::std::collections::HashMap;
 
 use crate::scheduler::Scheduler;
 
+pub struct GetQueue;
+
+impl Message for GetQueue {
+    type Result = String;
+}
+
 #[derive(Message)]
 pub struct NewTask {
     pub webhook_name: String,
