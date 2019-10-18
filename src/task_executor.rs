@@ -5,6 +5,7 @@ use ::subprocess::{CaptureData, Exec, ExitStatus, Redirection};
 use crate::messages::*;
 use crate::scheduler::Scheduler;
 
+/// The Actor that's actually responsible for executing tasks
 pub struct TaskExecutor {
     pub scheduler: Option<Addr<Scheduler>>,
 }

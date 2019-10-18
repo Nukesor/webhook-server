@@ -14,5 +14,6 @@ webhooks:
     cwd: '/home/nuke'
   -
     name: 'lshome'
-    command: '/bin/ls /home'
+    command: 'sleep 5'
     cwd: '/home/nuke'
+    mode: 'deploy'

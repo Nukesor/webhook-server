@@ -26,29 +26,30 @@ impl Actor for Scheduler {
 impl Handler<NewTask> for Scheduler {
     type Result = ();
 
+    /// Handle a NewTask. Check whether the task can be dispatch directly
     fn handle(&mut self, new_task: NewTask, _context: &mut Self::Context) {
         info!("Got new Task: {}", new_task.webhook_name);
 
         self.task_queue.add_task(new_task);
-        let tasks = self.task_queue.get_tasks_for_dispatch();
-
-        println!("Got tasks: {:?}", tasks);
-        for task in tasks {
-            self.dispatch_task(task);
-        }
+        self.dispatch_tasks();
     }
 }
 
 impl Handler<TaskCompleted> for Scheduler {
     type Result = ();
 
+    /// Handle the TaskCompleted answer of TaskExecutors
+    /// The response contains all process output + exit code
+    /// Also check for new tasks to dispatch
     fn handle(&mut self, message: TaskCompleted, _context: &mut Self::Context) {
         info!("Finished task: {} - {}", message.webhook_name, message.task_id);
         self.task_queue.finish_task(message);
+        self.dispatch_tasks();
     }
 }
 
 impl Scheduler {
+    /// Create a new Scheduler
     pub fn new(task_executor: Addr<TaskExecutor>, settings: Settings) -> Self {
         Scheduler {
             task_executor: task_executor.clone(),
@@ -59,17 +60,21 @@ impl Scheduler {
         }
     }
 
-    fn dispatch_task(&mut self, task: Task) {
-        let addr = self.own_addr.as_ref().unwrap().clone();
+    /// Check wheter new tasks from the queue can be dispatched
+    fn dispatch_tasks(&mut self) {
+        let tasks = self.task_queue.get_tasks_for_dispatch();
 
-        let message = StartTask {
-            webhook_name: task.webhook_name,
-            task_id: task.task_id,
-            command: task.command,
-            cwd: task.cwd,
-            scheduler: addr,
-        };
+        for task in tasks {
+            let addr = self.own_addr.as_ref().unwrap().clone();
+            let message = StartTask {
+                webhook_name: task.webhook_name,
+                task_id: task.task_id,
+                command: task.command,
+                cwd: task.cwd,
+                scheduler: addr,
+            };
 
-        self.task_executor.do_send(message );
+            self.task_executor.do_send(message );
+        }
     }
 }

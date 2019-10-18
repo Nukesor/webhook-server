@@ -4,7 +4,6 @@ use ::actix_web::HttpResponse;
 use ::chrono::prelude::*;
 use ::config::*;
 use ::handlebars::Handlebars;
-use ::hex::decode;
 use ::log::{info, warn};
 use ::serde::Deserialize;
 use ::shellexpand::tilde;
@@ -100,11 +99,13 @@ impl Settings {
             }
         };
 
+        // Verify that everything is in place, if `basic_auth_and_secret` is activated
         if settings.basic_auth_and_secret && (settings.secret.is_none() || settings.basic_auth_user.is_none() || settings.basic_auth_password.is_none()) {
             println!("If basic_auth_and_secret is true, all three values must be specified in your config");
             process::exit(1);
         }
 
+        // Webhook mode must be a valid
         for webhook in &settings.webhooks {
             if webhook.mode == "single" ||
                 webhook.mode == "deploy" ||
