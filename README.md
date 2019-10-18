@@ -12,10 +12,10 @@ Just install it with `yay -S webhook-server-git` or (yaourt if you like)
 
 **Raw installation:**
 
-    `git pull git@github.com:nukesor/webhook-server`
-    `cd webhook-server`
-    `cargo build --release`
-    `cp target/release/webhookserver /bin/webhookserver`
+    git pull git@github.com:nukesor/webhook-server
+    cd webhook-server
+    cargo build --release
+    cp target/release/webhookserver /bin/webhookserver
 
 
 ## Configuration: 
