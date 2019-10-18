@@ -27,6 +27,16 @@ Webhook-Server is configured via files in this order:
 Config values of higher hierarchy config files are overwritten by lower hierarchy config files. E.g. a value in `/etc/webhook_server.yml` can be overwritten by `~/.config/webhook_server.yml`.
 
 
+## Query current status
+
+You can get the current state of the webhook scheduler and finished tasks by querying the root (`/`) of the server.
+This will give you a JSON response with information about pretty much everything going on right now.
+
+To access the route, authenticate via `Basic` authorization.
+If no `Basic` authorization is specified while a secret exists, the secret will be used with an empty body.
+In case no authentication is used at all, the status can be queried by anyone. Please use some kind of authentication.
+
+
 ### Config values
 - `domain (127.0.0.1)` The domain the server should listen on
 - `port (8000)` The port the server should listen on
