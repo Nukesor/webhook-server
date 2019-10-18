@@ -186,7 +186,7 @@ pub fn verify_template_parameters(
     match result {
         Err(error) => {
             warn!(
-                "Error rendering comand with params: {:?}. Error: {:?}",
+                "Error rendering command with params: {:?}. Error: {:?}",
                 parameters, error
             );
             Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("{:?}", error)))

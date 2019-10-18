@@ -28,7 +28,6 @@ impl Handler<NewTask> for Scheduler {
 
     /// Handle a NewTask. Check whether the task can be dispatch directly
     fn handle(&mut self, new_task: NewTask, _context: &mut Self::Context) {
-        info!("Got new Task: {}", new_task.webhook_name);
 
         self.task_queue.add_task(new_task);
         self.dispatch_tasks();

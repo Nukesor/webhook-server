@@ -14,6 +14,6 @@ webhooks:
     cwd: '/home/nuke'
   -
     name: 'lshome'
-    command: 'sleep 5'
+    command: 'sleep 60'
     cwd: '/home/nuke'
-    mode: 'deploy'
+    mode: 'parallel'

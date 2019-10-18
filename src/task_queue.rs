@@ -1,7 +1,7 @@
 use ::std::collections::{HashMap, BTreeMap};
-
 use ::serde::Serialize;
 use ::chrono::prelude::*;
+use ::log::info;
 
 use crate::messages::NewTask;
 use crate::messages::TaskCompleted;
@@ -107,6 +107,7 @@ impl TaskQueue {
 
         }
 
+        info!("Got new Task: {}", incoming.webhook_name);
         self.max_id += 1;
         let task = Task::new(incoming, self.max_id);
         self.queued.insert(self.max_id, task);
