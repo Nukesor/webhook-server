@@ -1,14 +1,13 @@
 # Webhook-Server
 
-# WARNING This is still under heavy active development.
-**The documentation is mainly a roadmap for myself. not everything works as described yet.**
+Webhook server is a minimal footprint server to execute stuff on your server on requests.
+It's easy to setup and useful for custom CI and it supports Github's webhooks with secret out of the box.
 
-Webhook server is a minimal footprint server to execute stuff on your server on POST requests.
-It's easy to setup and super useful for custom CI. It supports Github's webhook secrets out of the box.
+Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
 
 ## Configuration: 
 
-Configuration is done via configuration files in this order.
+Webhook-Server is configured via files in this order:
 
 - `/etc/webhook_server.yml`
 - `~/.config/webhook_server.yml`
@@ -16,7 +15,6 @@ Configuration is done via configuration files in this order.
 
 Config values of higher hierarchy config files are overwritten by lower hierarchy config files. E.g. a value in `/etc/webhook_server.yml` can be overwritten by `~/.config/webhook_server.yml`.
 
-An example config file can be found in the `webhook_server.yml` file of the repository.
 
 ### Config values
 - `domain (127.0.0.1)` The domain the server should listen on
@@ -50,8 +48,9 @@ webhooks:
 
 ## Building a request
 
-Webhook server accepts json POST requests.  
-This is an example request issued with `httpie` and a secret of `72558847d57c22a2f19d711537cdc446` and `test:testtest` basic auth credentials:
+Webhook server accepts JSON POST requests and simple GET requests.
+
+This is an example POST request issued with `httpie` and a secret of `72558847d57c22a2f19d711537cdc446` and `test:testtest` basic auth credentials:
 
 ```
 echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:8000/ls \
@@ -60,7 +59,7 @@ echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:
 ```
 
 
-If you don't need templating, you can also send a simple GET request:
+If you don't need templating, you can send a simple GET request:
 
 ```
 http GET localhost:8000/ls Authorization:'Basic dGVzdDp0ZXN0dGVzdA=='
@@ -91,11 +90,11 @@ This would result in the execution of `ls -al /tmp` by the server.
 
 - `Authorization`: If `basic_auth_username` and `basic_auth_password` is specified, this should be the standard `Basic` base64 encoded authorization header. [Basic Auth guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization)
 - `Signature:` If you specify a secret, the content of the signature is the HMAC of the json payload with the UTF8-encoded secret as key.
-    This procedure is based on Github's webhook secret system. (Github says to use a hex key, but they interpret it as UTF8 -.-)  
+    This procedure is based on Github's webhook secret system. (Github tells you to use a hex key, but they interpret it as UTF8 themselves -.-)  
     Python example: `hmac.new(key, payload, hashlib.sha1)`  
     Ruby example: `OpenSSL::HMAC.hexdigest("SHA1", key, payload)`  
     [Github guide](https://developer.github.com/webhooks/securing/) 
-- `X-Hub-Signature`: If there is no `Signature`, this header will be used for signature checks to support Github's webhooks.
+- `X-Hub-Signature`: If there is no `Signature`, this header will be used for the signature check (to support Github's webhooks).
 
 
 
@@ -112,6 +111,7 @@ If you plan on using templating and publicly exposing your service, please use s
 
 **SSL:**
 Especially when using Basic Auth or templating it's highly recommended to use SSL encryption.
+This can be either done by your proxy web server (nginx, apache, caddy) or directly in the application.
 Otherwise your credentials or your template payload could leak to anybody listening.
 
 An example cert and key can be created like this `openssl req -nodes -new -x509 -keyout test.pem -out test.pem`
