@@ -11,7 +11,7 @@ actix-web = { version = "1", features = ["ssl"] }
 actix = "0.8"
 handlebars = "2.0"
 openssl = "0.10"
-chrono = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
 
 config = "0.9"
 log = "0.4"

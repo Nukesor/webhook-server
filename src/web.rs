@@ -1,3 +1,4 @@
+use ::std::process;
 use ::actix::prelude::*;
 use ::actix_web::http::header::HeaderMap;
 use ::actix_web::http::Method;
@@ -130,13 +131,15 @@ fn get_ssl_builder(settings: &Settings) -> SslAcceptorBuilder {
     let private_path = Path::new(&private_path_str);
     let cert_path = Path::new(&cert_path_str);
     if !private_path.exists() {
-        panic!(
+        println!(
             "Path to private key file is not correct: {}",
             private_path_str
-        )
+        );
+        process::exit(1);
     }
     if !cert_path.exists() {
-        panic!("Path to cert chain file is not correct: {}", cert_path_str)
+        println!("Path to cert chain file is not correct: {}", cert_path_str);
+        process::exit(1);
     }
 
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();

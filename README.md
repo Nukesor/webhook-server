@@ -42,7 +42,11 @@ webhooks:
 - `name` The name of the webhook, also the endpoint that's used to trigger the webhooks. E.g. `localhost:8000/ls`.
 - `command` The command thats actually used. If you want to dynamically build the command, you can use templating parameters like `{{name_of_parameter}}`.
 - `cwd` The current working directory the command should be executed from.
-
+- `mode` The mode determines the 
+    1. `deploy` At most one queued AND at most one running. This is the default.
+    2. `single` At most one queued OR running Item per webhook type
+    3. `parallel` Unlimited in queued and a default of max 4 parallel tasks. The number can be adjusted.
+- `parallel_processes` The max amount of parallel tasks when running in `parallel` mode.
 
 ## Building a request
 

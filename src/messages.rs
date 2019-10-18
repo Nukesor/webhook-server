@@ -16,7 +16,7 @@ pub struct NewTask {
 #[derive(Message)]
 pub struct StartTask {
     pub webhook_name: String,
-    pub task_id: usize,
+    pub task_id: i32,
     pub command: String,
     pub cwd: String,
     pub scheduler: Addr<Scheduler>,
@@ -25,7 +25,7 @@ pub struct StartTask {
 #[derive(Message)]
 pub struct TaskCompleted {
     pub webhook_name: String,
-    pub task_id: usize,
+    pub task_id: i32,
     pub exit_code: i32,
     pub stdout: String,
     pub stderr: String,

@@ -1,3 +1,4 @@
+use ::std::process;
 use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
 use ::chrono::prelude::*;
@@ -14,10 +15,21 @@ use crate::messages::NewTask;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Webhook {
-    name: String,
-    command: String,
-    cwd: String,
-    parallel_processes: i32,
+    pub name: String,
+    pub command: String,
+    pub cwd: String,
+    #[serde(default = "webhook_mode_default")]
+    pub mode: String,
+    #[serde(default = "webhook_parallel_default")]
+    pub parallel_processes: i32,
+}
+
+fn webhook_mode_default() -> String {
+    "deploy".to_string()
+}
+
+fn webhook_parallel_default() -> i32 {
+    8
 }
 
 #[derive(Debug, Deserialize)]
@@ -83,28 +95,33 @@ impl Settings {
         let settings: Settings = match settings.try_into() {
             Ok(settings) => settings,
             Err(err) => {
-                panic!("Error parsing settings: {:?}", err);
+                println!("Error parsing settings: {:?}", err);
+                process::exit(1);
             }
         };
 
-        //        if settings.basic_auth_and_secret && (settings.secret.is_empty() || settings.basic_auth_user.is_empty() || settings.basic_auth_password.is_empty()) {
-        //            panic!("If basic_auth_and_secret is true, all three values must be specified in your config");
-        //        }
+        if settings.basic_auth_and_secret && (settings.secret.is_none() || settings.basic_auth_user.is_none() || settings.basic_auth_password.is_none()) {
+            println!("If basic_auth_and_secret is true, all three values must be specified in your config");
+            process::exit(1);
+        }
 
-        // Verify that the settings secret is a valid hex string and save the decoded string for easier usage
-        if let Some(secret) = settings.secret.clone() {
-            if let Err(error) = decode(&secret) {
-                panic!("Secret must be a hex string: {}, {}", secret, error);
+        for webhook in &settings.webhooks {
+            if webhook.mode == "single" ||
+                webhook.mode == "deploy" ||
+                webhook.mode == "parallel" {
+                break;
             }
+            println!("Webhook mode must be one of 'single', 'deploy' or 'parallel'. Yours: {}", webhook.name);
+            process::exit(1);
         }
 
         settings
     }
 
-    /// Get a specific webhook from the
-    pub fn get_webhook_by_name(&self, name: String) -> Result<Webhook, HttpResponse> {
+    /// Get settings for a specific webhook
+    pub fn get_webhook_by_name(&self, name: &String) -> Result<Webhook, HttpResponse> {
         for webhook in self.webhooks.iter() {
-            if webhook.name == name {
+            if &webhook.name == name {
                 return Ok(webhook.clone());
             }
         }
@@ -141,7 +158,7 @@ pub fn get_task_from_request(
 ) -> Result<NewTask, HttpResponse> {
     let parameters = parameters.unwrap_or_default();
 
-    let webhook = settings.get_webhook_by_name(name)?;
+    let webhook = settings.get_webhook_by_name(&name)?;
     let command = verify_template_parameters(webhook.command, &parameters)?;
 
     Ok(NewTask {
