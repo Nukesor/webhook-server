@@ -7,14 +7,16 @@ Take a look at the example config file [webhook_server.yml](https://github.com/N
 
 
 ## Installation:
-**Arch Linux:**
+**Arch Linux:**  
 Just install it with `yay -S webhook-server-git` or (yaourt if you like)
 
 **Raw installation:**
-1. `git pull git@github.com:nukesor/webhook-server`
-2. `cd webhook-server`
-3. `cargo build --release`
-4. `cp target/release/webhookserver /bin/webhookserver`
+
+    `git pull git@github.com:nukesor/webhook-server`
+    `cd webhook-server`
+    `cargo build --release`
+    `cp target/release/webhookserver /bin/webhookserver`
+
 
 ## Configuration: 
 
