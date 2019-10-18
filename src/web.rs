@@ -94,7 +94,6 @@ fn webhook(
     // Check the credentials and signature headers of the request
     verify_authentication_header(&data.settings, &headers, &body)?;
 
-    info!("");
     info!("Incoming webhook for \"{}\":", webhook_name);
     debug!("Got payload: {:?}", payload);
 

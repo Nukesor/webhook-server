@@ -181,7 +181,9 @@ pub fn verify_template_parameters(
     template: String,
     parameters: &HashMap<String, String>,
 ) -> Result<String, HttpResponse> {
-    info!("Got parameters: {:?}", parameters);
+    if parameters.len() != 0 {
+        info!("Got parameters: {:?}", parameters);
+    }
     // Create a new handlebar instance and enable strict mode to prevent missing or malformed arguments
     let mut handlebars = Handlebars::new();
     handlebars.set_strict_mode(true);
@@ -197,7 +199,9 @@ pub fn verify_template_parameters(
             Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("{:?}", error)))
         }
         Ok(result) => {
-            info!("Template renders properly: {}", result);
+            if parameters.len() != 0 {
+                info!("Template renders properly: {}", result);
+            }
             Ok(result)
         }
     }
