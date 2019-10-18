@@ -114,5 +114,5 @@ Especially when using Basic Auth or templating it's highly recommended to use SS
 This can be either done by your proxy web server (nginx, apache, caddy) or directly in the application.
 Otherwise your credentials or your template payload could leak to anybody listening.
 
-An example cert and key can be created like this `openssl req -nodes -new -x509 -keyout test.pem -out test.pem`
+An example cert and key can be created like this `openssl req -nodes -new -x509 -keyout test.pem -out test.pem`.  
 If you need a password input for the private key, please create an issue or PR (much appreciated).
