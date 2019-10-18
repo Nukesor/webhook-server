@@ -50,8 +50,6 @@ impl Handler<StartTask> for TaskExecutor {
         let stdout = captured_data.stdout_str();
         let stderr = captured_data.stderr_str();
 
-        info!("{}", stdout);
-
         let message = TaskCompleted {
             webhook_name: task.webhook_name,
             task_id: task.task_id,
