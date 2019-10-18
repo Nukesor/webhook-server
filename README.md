@@ -5,6 +5,17 @@ It's easy to setup and useful for custom CI and it supports Github's webhooks wi
 
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
 
+
+## Installation:
+**Arch Linux:**
+Just install it with `yay -S webhook-server-git` or (yaourt if you like)
+
+**Raw installation:**
+1. `git pull git@github.com:nukesor/webhook-server`
+2. `cd webhook-server`
+3. `cargo build --release`
+4. `cp target/release/webhookserver /bin/webhookserver`
+
 ## Configuration: 
 
 Webhook-Server is configured via files in this order:
