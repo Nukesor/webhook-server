@@ -46,6 +46,18 @@ webhooks:
     3. `parallel` Unlimited in queued and a default of max 4 parallel tasks. The number can be adjusted.
 - `parallel_processes` The max amount of parallel tasks when running in `parallel` mode.
 
+
+## Misc files
+
+There are some template files for your setup in the [misc folder](https://github.com/Nukesor/webhook-server/tree/master/misc) of the repository.
+These include:
+
+- A nginx proxy route example
+- A systemd service file
+
+If you got anything else that might be useful to others, feel free to create a PR.
+
+
 ## Building a request
 
 Webhook server accepts JSON POST requests and simple GET requests.
