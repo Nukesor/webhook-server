@@ -1,4 +1,4 @@
-name: Webhook server tests
+name: Tests
 
 on: [push]
 

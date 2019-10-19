@@ -1,4 +1,4 @@
-name: Webhook-server packaging
+name: Packaging
 
 on:
   create:
