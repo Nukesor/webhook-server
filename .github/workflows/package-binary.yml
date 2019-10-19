@@ -1,6 +1,9 @@
-name: Rust
+name: Webhook-server packaging
 
-on: [push]
+on:
+  create:
+    tags:
+      -v*
 
 jobs:
   build:

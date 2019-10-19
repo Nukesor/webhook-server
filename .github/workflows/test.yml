@@ -1,10 +1,10 @@
-name: Rust
+name: Webhook server tests
 
 on: [push]
 
 jobs:
   build:
-    name: Publish binaries
+    name: Run tests
     runs-on: ubuntu-latest
 
     steps:
