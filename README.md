@@ -1,5 +1,11 @@
 # Webhook-Server
 
+[![GitHub release](https://img.shields.io/github/tag/nukesor/webhook-server.svg)](https://github.com/nukesor/webhook-server/releases/latest)
+[![Actions Status](https://github.com/Nukesor/webhook-server/workflows/test/badge.svg)](https://github.com/Nukesor/webhook-server/actions)
+ [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
+[![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
+
 Webhook server is a minimal footprint server to execute stuff on your server on requests.
 It's easy to setup and useful for custom CI and it supports Github's webhooks with secret out of the box.
 
