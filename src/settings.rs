@@ -9,6 +9,8 @@ use ::shellexpand::tilde;
 use ::std::collections::HashMap;
 use ::std::path::Path;
 use ::std::process;
+use ::anyhow::Result;
+use ::config::ConfigError;
 
 use crate::messages::NewTask;
 
@@ -67,28 +69,18 @@ impl Clone for Settings {
 }
 
 impl Settings {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self> {
         info!("Init settings file");
         let mut settings = config::Config::default();
-        settings.set_default("domain", "127.0.0.1").unwrap();
-        settings.set_default("port", "8000").unwrap();
-        settings
-            .set_default("ssl_private_key", None::<String>)
-            .unwrap();
-        settings
-            .set_default("ssl_cert_chain", None::<String>)
-            .unwrap();
-        settings.set_default("workers", 8).unwrap();
-        settings.set_default("secret", None::<String>).unwrap();
-        settings
-            .set_default("basic_auth_user", None::<String>)
-            .unwrap();
-        settings
-            .set_default("basic_auth_password", None::<String>)
-            .unwrap();
-        settings
-            .set_default("basic_auth_and_secret", false)
-            .unwrap();
+        settings.set_default("domain", "127.0.0.1")?;
+        settings.set_default("port", "8000")?;
+        settings.set_default("ssl_private_key", None::<String>)?;
+        settings.set_default("ssl_cert_chain", None::<String>)?;
+        settings.set_default("workers", 8)?;
+        settings.set_default("secret", None::<String>)?;
+        settings.set_default("basic_auth_user", None::<String>)?;
+        settings.set_default("basic_auth_password", None::<String>)?;
+        settings.set_default("basic_auth_and_secret", false)?;
 
         settings = parse_config(settings);
         let settings: Settings = match settings.try_into() {
@@ -98,15 +90,16 @@ impl Settings {
                 process::exit(1);
             }
         };
+        if settings.basic_auth_password.is_some() || settings.basic_auth_user.is_some() {
+            settings.basic_auth_user.as_ref().ok_or(ConfigError::NotFound("basic_auth_user".to_string()))?;
+            settings.basic_auth_password.as_ref().ok_or(ConfigError::NotFound("basic_auth_password".to_string()))?;
+        }
 
         // Verify that everything is in place, if `basic_auth_and_secret` is activated
-        if settings.basic_auth_and_secret
-            && (settings.secret.is_none()
-                || settings.basic_auth_user.is_none()
-                || settings.basic_auth_password.is_none())
-        {
-            println!("If basic_auth_and_secret is true, all three values must be specified in your config");
-            process::exit(1);
+        if settings.basic_auth_and_secret {
+            settings.secret.as_ref().ok_or(ConfigError::NotFound("secret".to_string()))?;
+            settings.basic_auth_user.as_ref().ok_or(ConfigError::NotFound("basic_auth_user".to_string()))?;
+            settings.basic_auth_password.as_ref().ok_or(ConfigError::NotFound("basic_auth_password".to_string()))?;
         }
 
         // Webhook mode must be a valid
@@ -121,7 +114,7 @@ impl Settings {
             process::exit(1);
         }
 
-        settings
+        Ok(settings)
     }
 
     /// Get settings for a specific webhook
@@ -150,7 +143,8 @@ fn parse_config(mut settings: Config) -> Config {
         info!("Checking path: {}", path);
         if Path::new(path).exists() {
             info!("Parsing config file at: {}", path);
-            settings.merge(config::File::with_name(path)).unwrap();
+            let config_file = config::File::with_name(path);
+            settings.merge(config_file)?;
         }
     }
 

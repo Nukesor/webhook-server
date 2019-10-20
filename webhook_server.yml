@@ -6,7 +6,7 @@ workers: 10
 secret: '72558847d57c22a2f19d711537cdc446'
 basic_auth_user: "test"
 basic_auth_password: "testtest"
-basic_auth_and_secret: false
+basic_auth_and_secret: true
 webhooks:
   -
     name: 'ls'

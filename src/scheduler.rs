@@ -28,8 +28,10 @@ impl Handler<GetQueue> for Scheduler {
 
     /// Handle a NewTask. Check whether the task can be dispatch directly
     fn handle(&mut self, _message: GetQueue, _context: &mut Self::Context) -> String {
-        let json = serde_json::to_string(&self.task_queue).unwrap();
-        json
+        match serde_json::to_string(&self.task_queue) {
+            Ok(json) => json,
+            Err(error) => format!("Got error while encoding json: {:?}", error),
+        }
     }
 }
 
