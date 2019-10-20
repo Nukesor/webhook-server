@@ -27,7 +27,12 @@ This project is relatively young, which means:
 **Arch Linux:**  
 Just install it with `yay -S webhook-server-git` or (yaourt if you like)
 
-**Raw installation:**
+**Releases:**  
+Each release includes prebuild binaries for Linux, Mac and Windows.
+You can finde them in the `releases` tab of the project.
+
+
+**Git installation:**
 
     git pull git@github.com:nukesor/webhook-server
     cd webhook-server
