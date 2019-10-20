@@ -1,7 +1,7 @@
 # Webhook-Server
 
 [![GitHub release](https://img.shields.io/github/tag/nukesor/webhook-server.svg)](https://github.com/nukesor/webhook-server/releases/latest)
-[![Actions Status](https://github.com/Nukesor/webhook-server/workflows/test/badge.svg)](https://github.com/Nukesor/webhook-server/actions)
+[![Actions Status](https://github.com/Nukesor/webhook-server/workflows/tests/badge.svg)](https://github.com/Nukesor/webhook-server/actions)
  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
 [![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
