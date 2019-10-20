@@ -3,7 +3,7 @@ Description=Starting webhook task executor
 After=network.target
 
 [Service]
-ExecStart=/bin/webhook-server
+ExecStart=/bin/webhookserver
 Restart=always
 User=your_user
 StandardOutput=file:/var/log/webhook/webhook.log
