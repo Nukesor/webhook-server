@@ -1,12 +1,11 @@
 use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
-use ::anyhow::Result;
+use ::anyhow::{Result, anyhow};
 use ::config::ConfigError;
 use ::config::*;
 use ::log::{info, warn};
 use ::serde::Deserialize;
-use ::shellexpand::tilde;
-use ::std::path::Path;
+use ::std::path::{Path, PathBuf};
 use ::std::process;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -137,21 +136,55 @@ impl Settings {
 }
 
 fn parse_config(mut settings: Config) -> Result<Config> {
-    let config_paths = [
-        "/etc/webhook_server.yml",
-        &tilde("~/.config/webhook_server.yml").into_owned(),
-        "./webhook_server.yml",
-    ];
     info!("Parsing config files");
+    let config_paths = get_config_paths()?;
 
     for path in config_paths.into_iter() {
-        info!("Checking path: {}", path);
-        if Path::new(path).exists() {
-            info!("Parsing config file at: {}", path);
-            let config_file = config::File::with_name(path);
+        info!("Checking path: {:?}", &path);
+        if path.exists() {
+            info!("Parsing config file at: {:?}", path);
+            let config_file = config::File::with_name(path.to_str().unwrap());
             settings.merge(config_file)?;
         }
     }
 
     Ok(settings)
 }
+
+
+#[cfg(target_os = "linux")]
+fn get_config_paths() -> Result<Vec<PathBuf>> {
+    let mut paths = Vec::new();
+    let home_dir = dirs::home_dir().ok_or(anyhow!("Couldn't resolve home dir"))?;
+    paths.push(Path::new("/etc/webhook_server.yml").to_path_buf());
+    paths.push(home_dir.join(".config/webhook_server.yml"));
+    paths.push(Path::new("./webhook_server.yml").to_path_buf());
+
+    Ok(paths)
+}
+
+
+#[cfg(target_os = "windows")]
+fn get_config_paths() -> Result<Vec<PathBuf>> {
+    let mut paths = Vec::new();
+
+    let home_dir = dirs::home_dir().ok_or(anyhow!("Couldn't resolve home dir"))?;
+    paths.push(home_dir.join("AppData\\Roaming\\webhook_server\\webhook_server.yml"));
+    paths.push(Path::new(".\\webhook_server.yml").to_path_buf());
+
+    Ok(paths)
+}
+
+
+#[cfg(target_os = "macos")]
+fn get_config_paths() -> Result<Vec<PathBuf>> {
+    let mut paths = Vec::new();
+
+    let home_dir = dirs::home_dir().ok_or(anyhow!("Couldn't resolve home dir"))?;
+    paths.push(home_dir.join("Library/Application Support/webhook_server.yml"));
+    paths.push(home_dir.join("Library/Preferences/webhook_server.yml"));
+    paths.push(Path::new("./webhook_server.yml").to_path_buf());
+
+    Ok(paths)
+}
+

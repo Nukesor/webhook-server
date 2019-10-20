@@ -18,12 +18,12 @@ handlebars = "2.0"
 chrono = { version = "0.4", features = ["serde"] }
 
 config = "0.9"
-anyhow = "^1"
+dirs = "2"
+anyhow = "1"
 log = "0.4"
 simplelog = "0.7"
 
 subprocess = "0.1"
-shellexpand = "1"
 
 serde = "1"
 serde_yaml = "0.8"

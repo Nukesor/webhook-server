@@ -50,6 +50,15 @@ Webhook-Server is configured via files in this order:
 
 Config values of higher hierarchy config files are overwritten by lower hierarchy config files. E.g. a value in `/etc/webhook_server.yml` can be overwritten by `~/.config/webhook_server.yml`.
 
+Mac-OS:
+- `~/Library/Application Support/webhook_server.yml`
+- `~/Library/Preferences/webhook_server.yml`
+- `./webhook_server.yml`
+
+Windows: 
+- `.\webhook_server.yml`
+- `$APPDATA$\Roaming\webhook_server\webhook_server.yml`
+
 
 ## Query current status
 
