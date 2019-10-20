@@ -2,6 +2,7 @@
 name = "webhook-server"
 version = "0.1.0"
 authors = ["Arne Beer <arne@twobeer.de>"]
+keywords = ["webhook", "server", "scheduler", "tasks", "executor", "https", "ssl"]
 edition = "2018"
 
 [[bin]]
@@ -11,7 +12,7 @@ path = "src/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = { version = "1", features = ["ssl"] }
+actix-web = { version = "1", features = ["rust-tls"] }
 actix = "0.8"
 handlebars = "2.0"
 openssl = "0.10"
@@ -34,3 +35,6 @@ sha-1 = "0.8"
 futures = "0.1"
 
 base64 = "0.10"
+
+[dependencies.rustls]
+version = "0.15"

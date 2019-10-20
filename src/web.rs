@@ -3,16 +3,17 @@ use ::actix_web::http::header::HeaderMap;
 use ::actix_web::http::Method;
 use ::actix_web::*;
 use ::log::{debug, info, warn};
-use ::openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
 use ::serde::Deserialize;
 use ::serde_json;
 use ::std::collections::HashMap;
-use ::std::path::Path;
-use ::std::process;
+use ::std::fs::File;
+use ::std::io::BufReader;
 use ::std::str;
+use rustls::internal::pemfile::{certs, rsa_private_keys};
+use rustls::{NoClientAuth, ServerConfig};
 
-use crate::messages::GetQueue;
 use crate::authentication::verify_authentication_header;
+use crate::messages::GetQueue;
 use crate::scheduler::Scheduler;
 use crate::settings::{get_task_from_request, Settings};
 
@@ -35,8 +36,18 @@ pub fn init_web_server(scheduler: Addr<Scheduler>, settings: Settings) {
 
     // Load the ssl key, if something is specified in the settings
     if settings.ssl_cert_chain.is_some() && settings.ssl_private_key.is_some() {
-        let builder = get_ssl_builder(&settings);
-        server.bind_ssl(address, builder).unwrap().start();
+        let chain_path = settings.ssl_cert_chain.unwrap();
+        let key_path = settings.ssl_private_key.unwrap();
+        let cert_file = &mut BufReader::new(File::open(chain_path).unwrap());
+        let key_file = &mut BufReader::new(File::open(key_path).unwrap());
+
+        let cert_chain = certs(cert_file).unwrap();
+        let mut keys = rsa_private_keys(key_file).unwrap();
+
+        let mut config = ServerConfig::new(NoClientAuth::new());
+        config.set_single_cert(cert_chain, keys.remove(0)).unwrap();
+
+        server.bind_rustls(address, config).unwrap().start();
     } else {
         server.bind(address).unwrap().start();
     }
@@ -63,11 +74,10 @@ fn index(
     // Check the credentials and signature headers of the request
     verify_authentication_header(&data.settings, &headers, &Vec::new())?;
 
-    let json = data.scheduler.send(GetQueue{}).wait().unwrap();
+    let json = data.scheduler.send(GetQueue {}).wait().unwrap();
     Ok(HttpResponse::Ok()
         .header(http::header::CONTENT_TYPE, "application/json")
-        .body(json)
-    )
+        .body(json))
 }
 
 /// Index route
@@ -137,34 +147,4 @@ fn get_headers_hash_map(map: &HeaderMap) -> Result<HashMap<String, String>, Http
     }
 
     Ok(headers)
-}
-
-fn get_ssl_builder(settings: &Settings) -> SslAcceptorBuilder {
-    info!("Initializing SSL");
-    // At this point we already know that these have to be Some, thereby just unwrap
-    let private_path_str = settings.ssl_private_key.clone().unwrap();
-    let cert_path_str = settings.ssl_cert_chain.clone().unwrap();
-
-    // Ensure both files exist
-    let private_path = Path::new(&private_path_str);
-    let cert_path = Path::new(&cert_path_str);
-    if !private_path.exists() {
-        println!(
-            "Path to private key file is not correct: {}",
-            private_path_str
-        );
-        process::exit(1);
-    }
-    if !cert_path.exists() {
-        println!("Path to cert chain file is not correct: {}", cert_path_str);
-        process::exit(1);
-    }
-
-    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    builder
-        .set_private_key_file(private_path, SslFiletype::PEM)
-        .unwrap();
-    builder.set_certificate_chain_file(cert_path).unwrap();
-
-    builder
 }
