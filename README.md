@@ -18,7 +18,6 @@ Take a look at the example config file [webhook_server.yml](https://github.com/N
 **DISCLAIMER:**
 
 This project is relatively young, which means: 
-- Errors aren't handled in a nice way yet 
 - Cross compilations for mac isn't tested yet.
 - Cross compilations for windows isn't tested yet.
 - There are probably some things regarding paths that aren't right on those platforms yet
