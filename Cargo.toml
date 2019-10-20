@@ -15,7 +15,6 @@ path = "src/main.rs"
 actix-web = { version = "1", features = ["rust-tls"] }
 actix = "0.8"
 handlebars = "2.0"
-openssl = "0.10"
 chrono = { version = "0.4", features = ["serde"] }
 
 config = "0.9"
