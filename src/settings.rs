@@ -1,18 +1,13 @@
 use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
-use ::chrono::prelude::*;
+use ::anyhow::Result;
+use ::config::ConfigError;
 use ::config::*;
-use ::handlebars::Handlebars;
 use ::log::{info, warn};
 use ::serde::Deserialize;
 use ::shellexpand::tilde;
-use ::std::collections::HashMap;
 use ::std::path::Path;
 use ::std::process;
-use ::anyhow::Result;
-use ::config::ConfigError;
-
-use crate::messages::NewTask;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Webhook {
@@ -82,24 +77,34 @@ impl Settings {
         settings.set_default("basic_auth_password", None::<String>)?;
         settings.set_default("basic_auth_and_secret", false)?;
 
-        settings = parse_config(settings);
-        let settings: Settings = match settings.try_into() {
-            Ok(settings) => settings,
-            Err(err) => {
-                println!("Error parsing settings: {:?}", err);
-                process::exit(1);
-            }
-        };
+        settings = parse_config(settings)?;
+        let settings: Settings = settings.try_into()?;
+
         if settings.basic_auth_password.is_some() || settings.basic_auth_user.is_some() {
-            settings.basic_auth_user.as_ref().ok_or(ConfigError::NotFound("basic_auth_user".to_string()))?;
-            settings.basic_auth_password.as_ref().ok_or(ConfigError::NotFound("basic_auth_password".to_string()))?;
+            settings
+                .basic_auth_user
+                .as_ref()
+                .ok_or(ConfigError::NotFound("basic_auth_user".to_string()))?;
+            settings
+                .basic_auth_password
+                .as_ref()
+                .ok_or(ConfigError::NotFound("basic_auth_password".to_string()))?;
         }
 
         // Verify that everything is in place, if `basic_auth_and_secret` is activated
         if settings.basic_auth_and_secret {
-            settings.secret.as_ref().ok_or(ConfigError::NotFound("secret".to_string()))?;
-            settings.basic_auth_user.as_ref().ok_or(ConfigError::NotFound("basic_auth_user".to_string()))?;
-            settings.basic_auth_password.as_ref().ok_or(ConfigError::NotFound("basic_auth_password".to_string()))?;
+            settings
+                .secret
+                .as_ref()
+                .ok_or(ConfigError::NotFound("secret".to_string()))?;
+            settings
+                .basic_auth_user
+                .as_ref()
+                .ok_or(ConfigError::NotFound("basic_auth_user".to_string()))?;
+            settings
+                .basic_auth_password
+                .as_ref()
+                .ok_or(ConfigError::NotFound("basic_auth_password".to_string()))?;
         }
 
         // Webhook mode must be a valid
@@ -131,7 +136,7 @@ impl Settings {
     }
 }
 
-fn parse_config(mut settings: Config) -> Config {
+fn parse_config(mut settings: Config) -> Result<Config> {
     let config_paths = [
         "/etc/webhook_server.yml",
         &tilde("~/.config/webhook_server.yml").into_owned(),
@@ -148,55 +153,5 @@ fn parse_config(mut settings: Config) -> Config {
         }
     }
 
-    settings
-}
-
-pub fn get_task_from_request(
-    settings: &Settings,
-    name: String,
-    parameters: Option<HashMap<String, String>>,
-) -> Result<NewTask, HttpResponse> {
-    let parameters = parameters.unwrap_or_default();
-
-    let webhook = settings.get_webhook_by_name(&name)?;
-    let command = verify_template_parameters(webhook.command, &parameters)?;
-
-    Ok(NewTask {
-        webhook_name: webhook.name,
-        parameters: parameters,
-        cwd: webhook.cwd,
-        command: command,
-        added_at: Local::now(),
-    })
-}
-
-/// Verify that the template renders with the given parameters
-pub fn verify_template_parameters(
-    template: String,
-    parameters: &HashMap<String, String>,
-) -> Result<String, HttpResponse> {
-    if parameters.len() != 0 {
-        info!("Got parameters: {:?}", parameters);
-    }
-    // Create a new handlebar instance and enable strict mode to prevent missing or malformed arguments
-    let mut handlebars = Handlebars::new();
-    handlebars.set_strict_mode(true);
-
-    // Check the template for render errors with the current parameter
-    let result = handlebars.render_template(&template, parameters);
-    match result {
-        Err(error) => {
-            warn!(
-                "Error rendering command with params: {:?}. Error: {:?}",
-                parameters, error
-            );
-            Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("{:?}", error)))
-        }
-        Ok(result) => {
-            if parameters.len() != 0 {
-                info!("Template renders properly: {}", result);
-            }
-            Ok(result)
-        }
-    }
+    Ok(settings)
 }

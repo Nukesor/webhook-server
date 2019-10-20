@@ -7,8 +7,8 @@ mod task_queue;
 mod web;
 
 use ::actix::prelude::*;
-use ::simplelog::{Config, LevelFilter, SimpleLogger};
 use ::anyhow::Result;
+use ::simplelog::{Config, LevelFilter, SimpleLogger};
 
 use crate::scheduler::Scheduler;
 use crate::settings::Settings;
