@@ -15,6 +15,15 @@ Tasks can be processed in parallel or one-by-one, the mode of execution and amou
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
 
 
+**DISCLAIMER:**
+
+This project is relatively young, which means: 
+- Errors aren't handled in a nice way yet 
+- Cross compilations for mac isn't tested yet.
+- Cross compilations for windows isn't tested yet.
+- There are probably some things regarding paths that aren't right on those platforms yet
+
+
 ## Installation:
 **Arch Linux:**  
 Just install it with `yay -S webhook-server-git` or (yaourt if you like)
