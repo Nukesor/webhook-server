@@ -34,7 +34,7 @@ You can finde them in the `releases` tab of the project.
 
 **Git installation:**
 
-    git pull git@github.com:nukesor/webhook-server
+    git clone https://github.com/nukesor/webhook-server
     cd webhook-server
     cargo build --release
     cp target/release/webhookserver /bin/webhookserver
