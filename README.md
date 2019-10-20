@@ -169,3 +169,14 @@ Otherwise your credentials or your template payload could leak to anybody listen
 
 An example cert and key can be created like this `openssl req -nodes -new -x509 -keyout test.pem -out test.pem`.  
 If you need a password input for the private key, please create an issue or PR (much appreciated).
+
+
+## Github Webhook Setup:
+
+- Content-Type: Json
+- Secret: Same string as in your config
+- Enable SSL verification: Recommended, if you have any kind of SSL
+- Just the push event (We don't use the payload anyway)
+
+
+You can click on the `Recent Deliveries` to redeliver them in case you want to debug your setup.
