@@ -26,7 +26,7 @@ fn main() -> Result<()> {
         SyncArbiter::start(settings.workers, move || TaskExecutor { scheduler: None });
     let scheduler = Scheduler::new(task_executor.clone(), settings.clone());
 
-    init_web_server(scheduler.start(), settings);
+    init_web_server(scheduler.start(), settings)?;
 
     let _ = sys.run();
 
