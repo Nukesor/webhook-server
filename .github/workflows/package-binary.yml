@@ -16,14 +16,14 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            artifact_name: proxyboi
-            release_name: proxyboi-linux-amd64
+            artifact_name: webhookserver
+            release_name: webhookserver-linux-amd64
           - os: windows-latest
-            artifact_name: proxyboi.exe
-            release_name: proxyboi-windows-amd64.exe
+            artifact_name: webhookserver.exe
+            release_name: webhookserver-windows-amd64.exe
           - os: macos-latest
-            artifact_name: proxyboi
-            release_name: proxyboi-macos-amd64
+            artifact_name: webhookserver
+            release_name: webhookserver-macos-amd64
 
     steps:
     - uses: hecrj/setup-rust-action@v1
