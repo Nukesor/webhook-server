@@ -1,12 +1,11 @@
 use ::actix_web::http::StatusCode;
 use ::actix_web::HttpResponse;
-use ::anyhow::{Result, anyhow};
+use ::anyhow::{anyhow, Result};
 use ::config::ConfigError;
 use ::config::*;
 use ::log::{info, warn};
 use ::serde::Deserialize;
 use ::std::path::{Path, PathBuf};
-use ::std::process;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Webhook {
@@ -109,13 +108,12 @@ impl Settings {
         // Webhook mode must be a valid
         for webhook in &settings.webhooks {
             if webhook.mode == "single" || webhook.mode == "deploy" || webhook.mode == "parallel" {
-                break;
+                continue;
             }
-            println!(
+            return Err(anyhow!(
                 "Webhook mode must be one of 'single', 'deploy' or 'parallel'. Yours: {}",
                 webhook.name
-            );
-            process::exit(1);
+            ));
         }
 
         Ok(settings)
@@ -151,7 +149,6 @@ fn parse_config(mut settings: Config) -> Result<Config> {
     Ok(settings)
 }
 
-
 #[cfg(target_os = "linux")]
 fn get_config_paths() -> Result<Vec<PathBuf>> {
     let mut paths = Vec::new();
@@ -162,7 +159,6 @@ fn get_config_paths() -> Result<Vec<PathBuf>> {
 
     Ok(paths)
 }
-
 
 #[cfg(target_os = "windows")]
 fn get_config_paths() -> Result<Vec<PathBuf>> {
@@ -175,7 +171,6 @@ fn get_config_paths() -> Result<Vec<PathBuf>> {
     Ok(paths)
 }
 
-
 #[cfg(target_os = "macos")]
 fn get_config_paths() -> Result<Vec<PathBuf>> {
     let mut paths = Vec::new();
@@ -187,4 +182,3 @@ fn get_config_paths() -> Result<Vec<PathBuf>> {
 
     Ok(paths)
 }
-
