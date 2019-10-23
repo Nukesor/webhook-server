@@ -2,18 +2,18 @@ domain: 127.0.0.1
 port: 8000
 ssl_private_key: null
 ssl_cert_chain: null
-workers: 10
+workers: 6
 secret: '72558847d57c22a2f19d711537cdc446'
 basic_auth_user: "test"
 basic_auth_password: "testtest"
-basic_auth_and_secret: true
+basic_auth_and_secret: false
 webhooks:
   -
     name: 'ls'
     command: '/bin/ls {{param1}} {{param2}}'
     cwd: '/home/nuke'
   -
-    name: 'lshome'
+    name: 'sleep'
     command: 'sleep 60'
     cwd: '/home/nuke'
     mode: 'parallel'

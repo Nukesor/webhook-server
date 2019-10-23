@@ -23,7 +23,7 @@ fn webhook_mode_default() -> String {
 }
 
 fn webhook_parallel_default() -> i32 {
-    8
+    4
 }
 
 #[derive(Debug, Deserialize)]

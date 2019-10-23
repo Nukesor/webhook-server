@@ -6,14 +6,14 @@
 [![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
 [![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
 
-Webhook server is a minimal footprint server to execute stuff on your server on requests.
-It's easy to setup and useful for custom CI and it supports Github's webhooks with secret out of the box.
+Webhook server is a minimal footprint server to execute stuff on your server on incoming http requests.
+It has been originally designed for for custom CI and supports Github's webhooks out of the box.
 
-The server contains a scheduler an can also be used to schedule long running tasks via webhook.
+Webhook server comes with a custom scheduler, which by default prevents parallel deployments and unnecessary deployment calls.
+In case you want to queue many load-heavy long running tasks, it allows you to specify the amount of concurrent tasks for each type, to prevent overburdening your system.
 Tasks can be processed in parallel or one-by-one, the mode of execution and amount of parallel processes can be configured per webhook type.
 
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
-
 
 **DISCLAIMER:**
 
@@ -56,8 +56,8 @@ Mac-OS:
 - `./webhook_server.yml`
 
 Windows: 
-- `.\webhook_server.yml`
 - `$APPDATA$\Roaming\webhook_server\webhook_server.yml`
+- `.\webhook_server.yml`
 
 ### Config values
 - `domain (127.0.0.1)` The domain the server should listen on
@@ -83,11 +83,11 @@ webhooks:
 - `name` The name of the webhook, also the endpoint that's used to trigger the webhooks. E.g. `localhost:8000/ls`.
 - `command` The command thats actually used. If you want to dynamically build the command, you can use templating parameters like `{{name_of_parameter}}`.
 - `cwd` The current working directory the command should be executed from.
-- `mode` The mode determines the 
+- `mode (deploy)` Determines the mode at which the command shall be executed.
     1. `deploy` At most one queued AND at most one running. This is the default.
     2. `single` At most one queued OR running Item per webhook type
-    3. `parallel` Unlimited in queued and a default of max 4 parallel tasks. The number can be adjusted.
-- `parallel_processes` The max amount of parallel tasks when running in `parallel` mode.
+    3. `parallel` Unlimited queued and a default of max 4 parallel tasks. The number can be adjusted.
+- `parallel_processes (4)` The max amount of parallel tasks when running in `parallel` mode.
 
 
 ## Misc files
@@ -99,6 +99,19 @@ These include:
 - A systemd service file
 
 If you got anything else that might be useful to others, feel free to create a PR.
+
+
+## Github Webhook Setup:
+
+Go to your project's settings tab and select webhooks. Create a new one and set these options:
+
+- Content-Type: Json
+- Secret: Same string as in your config
+- Enable SSL verification: Recommended, if you have any kind of SSL
+- Just the push event (The payload isn't used anyway)
+
+
+You can click on the `Recent Deliveries` to redeliver any sent webhook, in case you want to debug your setup.
 
 
 ## Building a request
@@ -180,14 +193,3 @@ Otherwise your credentials or your template payload could leak to anybody listen
 
 An example cert and key can be created like this `openssl req -nodes -new -x509 -keyout test.pem -out test.pem`.  
 If you need a password input for the private key, please create an issue or PR (much appreciated).
-
-
-## Github Webhook Setup:
-
-- Content-Type: Json
-- Secret: Same string as in your config
-- Enable SSL verification: Recommended, if you have any kind of SSL
-- Just the push event (We don't use the payload anyway)
-
-
-You can click on the `Recent Deliveries` to redeliver them in case you want to debug your setup.
