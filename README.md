@@ -6,6 +6,9 @@
 [![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
 [![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
 
+
+![Webhook server example](https://github.com/Nukesor/images/blob/master/webhook-server.gif)
+
 Webhook server is a minimal footprint server to execute stuff on your server on incoming http requests.
 It has been originally designed for for custom CI and supports Github's webhooks out of the box.
 
