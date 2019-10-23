@@ -13,6 +13,10 @@ webhooks:
     command: '/bin/ls {{param1}} {{param2}}'
     cwd: '/home/nuke'
   -
+    name: 'lshome'
+    command: '/bin/ls /home'
+    cwd: '/home/nuke'
+  -
     name: 'sleep'
     command: 'sleep 60'
     cwd: '/home/nuke'
