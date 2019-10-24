@@ -10,10 +10,10 @@
 ![Webhook server example](https://github.com/Nukesor/images/blob/master/webhook-server.gif)
 
 Webhook server is a minimal footprint server to execute stuff on your server on incoming http requests.
-It has been originally designed for for continuous integration and supports Github's webhooks out of the box.
+It has been designed for continuous integration and supports Github's webhooks out of the box.
 
-Webhook server comes with a custom scheduler, which by default prevents parallel deployments and unnecessary deployment calls.
-In case you want to queue many load-heavy long running tasks, it allows you to specify the amount of concurrent tasks for each type, to prevent overburdening your system.
+Webhook server also comes with a custom scheduler. which by default prevents parallel deployments and unnecessary deployment executions.
+In case you want to queue many parallel load-heavy long-running tasks, it allows you to specify the amount of concurrent tasks for each type, to prevent overburdening your system.
 Tasks can be processed in parallel or one-by-one, the mode of execution and amount of parallel processes can be configured per webhook type.
 
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
