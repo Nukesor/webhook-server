@@ -18,6 +18,11 @@ Tasks can be processed in parallel or one-by-one, the mode of execution and amou
 
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
 
+**Example applications:**
+- Continuous integration for projects (Supports Github's webhooks)
+- Trigger tasks on your server via a browser
+- Triggering of tasks between servers with minimal setup
+
 **DISCLAIMER:**
 
 This project is relatively young, which means: 
