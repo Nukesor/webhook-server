@@ -1,7 +1,7 @@
 [package]
 name = "webhook-server"
 version = "0.1.0"
-authors = ["Arne Beer <arne@twobeer.de>"]
+authors = ["Arne Beer <contact@arne.beer>"]
 keywords = ["webhook", "server", "scheduler", "tasks", "executor", "https", "ssl"]
 edition = "2018"
 
