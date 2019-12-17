@@ -1,8 +1,14 @@
 [package]
 name = "webhook-server"
+description = "A simple web server to easily execute scripts/executables on incoming requests."
 version = "0.1.0"
 authors = ["Arne Beer <contact@arne.beer>"]
-keywords = ["webhook", "server", "scheduler", "tasks", "executor", "https", "ssl"]
+repository = "https://github.com/nukesor/webhook-server"
+homepage = "https://github.com/nukesor/webhook-server"
+documentation = "https://docs.rs/webhook-server"
+license = "MIT"
+keywords = ["webhook", "server", "script", "executor", "https"]
+readme = "README.md"
 edition = "2018"
 
 [[bin]]
