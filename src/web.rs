@@ -163,7 +163,7 @@ fn get_headers_hash_map(map: &HeaderMap) -> Result<HashMap<String, String>, Http
     Ok(headers)
 }
 
-pub fn get_task_from_request(
+fn get_task_from_request(
     settings: &Settings,
     name: String,
     parameters: Option<HashMap<String, String>>,
@@ -183,7 +183,7 @@ pub fn get_task_from_request(
 }
 
 /// Verify that the template renders with the given parameters
-pub fn verify_template_parameters(
+fn verify_template_parameters(
     template: String,
     parameters: &HashMap<String, String>,
 ) -> Result<String, HttpResponse> {

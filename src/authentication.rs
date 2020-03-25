@@ -170,8 +170,20 @@ fn verify_basic_auth_header(
         return Err(HttpResponse::Unauthorized().body("Malformed credential string"));
     }
 
-    let user = settings.basic_auth_user.clone().unwrap_or_default();
-    let password = settings.basic_auth_password.clone().unwrap_or_default();
+    // Ensure user is set in config
+    let user = if let Some(user) = &settings.basic_auth_user {
+        user
+    } else {
+        return Err(HttpResponse::Unauthorized().finish());
+    };
+
+    // Ensure password is set in config
+    let password = if let Some(password) = &settings.basic_auth_password {
+        password
+    } else {
+        return Err(HttpResponse::Unauthorized().finish());
+    };
+
 
     if user != credentials[0] || password != credentials[1] {
         warn!("Got invalid base64 credentials");
