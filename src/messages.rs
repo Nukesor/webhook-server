@@ -4,13 +4,12 @@ use ::std::collections::HashMap;
 
 use crate::scheduler::Scheduler;
 
+#[derive(Message)]
+#[rtype(result = "String")]
 pub struct GetQueue;
 
-impl Message for GetQueue {
-    type Result = String;
-}
-
 #[derive(Message)]
+#[rtype(result = "()")]
 pub struct NewTask {
     pub webhook_name: String,
     pub parameters: HashMap<String, String>,
@@ -20,6 +19,7 @@ pub struct NewTask {
 }
 
 #[derive(Message)]
+#[rtype(result = "()")]
 pub struct StartTask {
     pub webhook_name: String,
     pub task_id: i32,
@@ -29,6 +29,7 @@ pub struct StartTask {
 }
 
 #[derive(Message)]
+#[rtype(result = "()")]
 pub struct TaskCompleted {
     pub webhook_name: String,
     pub task_id: i32,

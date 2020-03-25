@@ -1,7 +1,6 @@
 use ::actix::prelude::*;
 use ::actix_web::http::header::HeaderMap;
 use ::actix_web::http::Method;
-use ::actix_web::http::StatusCode;
 use ::actix_web::*;
 use ::anyhow::{anyhow, Result};
 use ::chrono::prelude::*;
@@ -59,9 +58,9 @@ pub fn init_web_server(scheduler: Addr<Scheduler>, settings: Settings) -> Result
         let mut config = ServerConfig::new(NoClientAuth::new());
         config.set_single_cert(cert_chain, keys.remove(0))?;
 
-        server.bind_rustls(address, config)?.start();
+        server.bind_rustls(address, config)?.run();
     } else {
-        server.bind(address)?.start();
+        server.bind(address)?.run();
     }
 
     Ok(())
@@ -79,7 +78,7 @@ struct Payload {
 }
 
 /// Index route for getting current state of the server
-fn index(
+async fn index(
     data: web::Data<AppState>,
     request: web::HttpRequest,
 ) -> Result<HttpResponse, HttpResponse> {
@@ -88,14 +87,14 @@ fn index(
     // Check the credentials and signature headers of the request
     verify_authentication_header(&data.settings, &headers, &Vec::new())?;
 
-    let json = data.scheduler.send(GetQueue {}).wait().unwrap();
+    let json = data.scheduler.send(GetQueue {}).await.or(Err(HttpResponse::InternalServerError()))?;
     Ok(HttpResponse::Ok()
         .header(http::header::CONTENT_TYPE, "application/json")
         .body(json))
 }
 
 /// Index route
-fn webhook(
+async fn webhook(
     data: web::Data<AppState>,
     path_info: web::Path<String>,
     request: web::HttpRequest,
@@ -202,7 +201,7 @@ fn verify_template_parameters(
                 "Error rendering command with params: {:?}. Error: {:?}",
                 parameters, error
             );
-            Err(HttpResponse::build(StatusCode::BAD_REQUEST).json(format!("{:?}", error)))
+            Err(HttpResponse::BadRequest().json(format!("{:?}", error)))
         }
         Ok(result) => {
             if parameters.len() != 0 {

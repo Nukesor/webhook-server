@@ -18,18 +18,20 @@ path = "src/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = { version = "1", features = ["rust-tls"] }
-actix = "0.8"
-handlebars = "2.0"
+rustls = "0.16"
+actix = "0.10.0-alpha.2"
+actix-rt = "1.0.0"
+actix-web = { version = "2", features=["rustls"]}
+handlebars = "3"
 chrono = { version = "0.4", features = ["serde"] }
 
-config = "0.9"
+config = "0.10"
 dirs = "2"
 anyhow = "1"
 log = "0.4"
 simplelog = "0.7"
 
-subprocess = "0.1"
+subprocess = "^0.2"
 
 serde = "1"
 serde_yaml = "0.8"
@@ -38,9 +40,6 @@ hex = "0.4"
 
 hmac = "0.7"
 sha-1 = "0.8"
-futures = "0.1"
+futures = "0.3"
 
-base64 = "0.10"
-
-[dependencies.rustls]
-version = "0.15"
+base64 = "0.12"
