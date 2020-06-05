@@ -29,7 +29,7 @@ config = "0.10"
 dirs = "2"
 anyhow = "1"
 log = "0.4"
-simplelog = "0.7"
+simplelog = "0.8"
 
 subprocess = "^0.2"
 
