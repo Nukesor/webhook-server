@@ -17,28 +17,31 @@ Tasks can be processed in parallel or one-by-one, the mode of execution and amou
 
 **Example applications:**
 
-- Continuous integration for projects (Supports Github's webhooks)
+- Continuous integration for projects (Supports Github's webhooks).
 - On-Demand execution of parallel load-heavy tasks.
-- Trigger tasks on your server via a browser
-- Triggering of tasks between servers with minimal setup
+- Trigger tasks on your server via a browser.
+- Trigger tasks between servers with a minimal setup.
 
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
 
 ## Installation
 
 **Arch Linux:**  
-Just install it with `yay -S webhook-server-git` or (yaourt if you like)
+Just install it with any package manager, e.g. `yay -S webhook-server-git`.
 
 **Releases:**  
 Each release includes prebuild binaries for Linux, Mac and Windows.
 You can finde them in the `releases` tab of the project.
 
-**Git installation:**
+**Manual installation:**
 
-    git clone https://github.com/nukesor/webhook-server
-    cd webhook-server
-    cargo build --release
-    cp target/release/webhookserver /bin/webhookserver
+```bash
+git clone https://github.com/nukesor/webhook-server
+cd webhook-server
+cargo install --path .
+```
+
+Your `$CARGO_HOME/bin` folder should be in your $PATH.
 
 ## Configuration
 
@@ -125,7 +128,6 @@ echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:
         Signature:'sha1=d762407ca7fb309dfbeb73c080caf6394751f0a4' \
         Authorization:'Basic dGVzdDp0ZXN0dGVzdA=='
 ```
-
 
 If you don't need templating, you can send a simple GET request:
 
