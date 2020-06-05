@@ -6,11 +6,9 @@
 [![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
 [![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
 
-
 ![Webhook server example](https://github.com/Nukesor/images/blob/master/webhook-server.gif)
 
-
-This little helper serves a simple purpose: To execute commands on your server on incoming http requests.
+This little helper serves a simple purpose: Execute commands on your server on incoming http requests.
 Initially, it has been designed for continuous integration and supports Github's webhooks out of the box.
 
 By now, Webhook-Server also comes with a custom scheduler. By default, the scheduler prevents parallel deployments and unnecessary deployment executions.
@@ -18,6 +16,7 @@ But in case you want to queue many parallel load-heavy long-running tasks, it al
 Tasks can be processed in parallel or one-by-one, the mode of execution and amount of parallel processes can be configured per webhook type.
 
 **Example applications:**
+
 - Continuous integration for projects (Supports Github's webhooks)
 - On-Demand execution of parallel load-heavy tasks.
 - Trigger tasks on your server via a browser
@@ -25,14 +24,14 @@ Tasks can be processed in parallel or one-by-one, the mode of execution and amou
 
 Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
 
-## Installation:
+## Installation
+
 **Arch Linux:**  
 Just install it with `yay -S webhook-server-git` or (yaourt if you like)
 
 **Releases:**  
 Each release includes prebuild binaries for Linux, Mac and Windows.
 You can finde them in the `releases` tab of the project.
-
 
 **Git installation:**
 
@@ -41,8 +40,7 @@ You can finde them in the `releases` tab of the project.
     cargo build --release
     cp target/release/webhookserver /bin/webhookserver
 
-
-## Configuration: 
+## Configuration
 
 Webhook-Server is configured via files in this order:
 
@@ -53,15 +51,18 @@ Webhook-Server is configured via files in this order:
 Config values of higher hierarchy config files are overwritten by lower hierarchy config files. E.g. a value in `/etc/webhook_server.yml` can be overwritten by `~/.config/webhook_server.yml`.
 
 Mac-OS:
+
 - `~/Library/Application Support/webhook_server.yml`
 - `~/Library/Preferences/webhook_server.yml`
 - `./webhook_server.yml`
 
-Windows: 
+Windows:
+
 - `$APPDATA$\Roaming\webhook_server\webhook_server.yml`
 - `.\webhook_server.yml`
 
 ### Config values
+
 - `domain (127.0.0.1)` The domain the server should listen on
 - `port (8000)` The port the server should listen on
 - `ssl_private_key (null)` Path to SSL private key. The server will use it's own ssl certificate. Recommended, if you aren't using a proxy webserver, that already uses SSL. Using any kind of SSL is highly recommended, especially if you publicly expose your endpoint.
@@ -73,7 +74,7 @@ Windows:
 - `basic_auth_and_secret (false)` By default it's only required to authenticate via BasicAuth OR signature authentication. If you want to be super safe, set this to true to require both.
 - `webhooks` A list of webhooks. The whole thing looks pretty much like this:
 
-```
+```yaml
 webhooks:
   -
     name: 'ls'
@@ -82,6 +83,7 @@ webhooks:
 ```
 
 **Webhook config values**
+
 - `name` The name of the webhook, also the endpoint that's used to trigger the webhooks. E.g. `localhost:8000/ls`.
 - `command` The command thats actually used. If you want to dynamically build the command, you can use templating parameters like `{{name_of_parameter}}`.
 - `cwd` The current working directory the command should be executed from.
@@ -90,7 +92,6 @@ webhooks:
     2. `single` At most one queued OR running Item per webhook type
     3. `parallel` Unlimited queued and a default of max 4 parallel tasks. The number can be adjusted.
 - `parallel_processes (4)` The max amount of parallel tasks when running in `parallel` mode.
-
 
 ## Misc files
 
@@ -102,8 +103,7 @@ These include:
 
 If you got anything else that might be useful to others, feel free to create a PR.
 
-
-## Github Webhook Setup:
+## Github Webhook Setup
 
 Go to your project's settings tab and select webhooks. Create a new one and set these options:
 
@@ -112,9 +112,7 @@ Go to your project's settings tab and select webhooks. Create a new one and set 
 - Enable SSL verification: Recommended, if you have any kind of SSL
 - Just the push event (The payload isn't used anyway)
 
-
 You can click on the `Recent Deliveries` to redeliver any sent webhook, in case you want to debug your setup.
-
 
 ## Building a request
 
@@ -122,7 +120,7 @@ Webhook server accepts JSON POST requests and simple GET requests.
 
 This is an example POST request issued with `httpie` and a secret of `72558847d57c22a2f19d711537cdc446` and `test:testtest` basic auth credentials:
 
-```
+```bash
 echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:8000/ls \
         Signature:'sha1=d762407ca7fb309dfbeb73c080caf6394751f0a4' \
         Authorization:'Basic dGVzdDp0ZXN0dGVzdA=='
@@ -131,10 +129,9 @@ echo -n '{"parameters":{"param1":"-al","param2":"/tmp"}}' | http POST localhost:
 
 If you don't need templating, you can send a simple GET request:
 
-```
+```bash
 http GET localhost:8000/ls Authorization:'Basic dGVzdDp0ZXN0dGVzdA=='
 ```
-
 
 **Payload:**
 
@@ -144,7 +141,7 @@ If no templating is needed, you can provide an empty object as payload or simply
 
 For instance, the payload for the command `'/bin/ls {{param1}} {{param2}}'` could look like this:
 
-```
+```json
 {
     "parameters": {
         "param1": "-al",
@@ -155,7 +152,6 @@ For instance, the payload for the command `'/bin/ls {{param1}} {{param2}}'` coul
 
 This would result in the execution of `ls -al /tmp` by the server.
 
-
 **Headers:**
 
 - `Authorization`: If `basic_auth_username` and `basic_auth_password` is specified, this should be the standard `Basic` base64 encoded authorization header. [Basic Auth guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization)
@@ -163,9 +159,8 @@ This would result in the execution of `ls -al /tmp` by the server.
     This procedure is based on Github's webhook secret system. (Github tells you to use a hex key, but they interpret it as UTF8 themselves -.-)  
     Python example: `hmac.new(key, payload, hashlib.sha1)`  
     Ruby example: `OpenSSL::HMAC.hexdigest("SHA1", key, payload)`  
-    [Github guide](https://developer.github.com/webhooks/securing/) 
+    [Github guide](https://developer.github.com/webhooks/securing/)
 - `X-Hub-Signature`: If there is no `Signature`, this header will be used for the signature check (to support Github's webhooks).
-
 
 ## Query current status
 
@@ -176,7 +171,6 @@ To access the route, authenticate via `Basic` authorization.
 If no `Basic` authorization is specified while a secret exists, the secret will be used with an empty body.
 In case no authentication is used at all, the status can be queried by anyone. Please use some kind of authentication.
 
-
 ## Security
 
 **Code injection:**
@@ -186,7 +180,6 @@ If you plan on using templating and publicly exposing your service, please use s
 1. You can use a secret to verify the payload with a signature (Github's authentication method). Anyway, this method is a bit annoying to implement, if you write your own implementation.
 2. You can use basic auth.
 3. If you want to be super safe, you can require both authentication methods.
-
 
 **SSL:**
 Especially when using Basic Auth or templating it's highly recommended to use SSL encryption.
