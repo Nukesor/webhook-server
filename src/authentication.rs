@@ -184,7 +184,6 @@ fn verify_basic_auth_header(
         return Err(HttpResponse::Unauthorized().finish());
     };
 
-
     if user != credentials[0] || password != credentials[1] {
         warn!("Got invalid base64 credentials");
         return Err(HttpResponse::Unauthorized().finish());

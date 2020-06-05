@@ -56,9 +56,9 @@ impl Handler<StartTask> for TaskExecutor {
         let message = TaskCompleted {
             webhook_name: task.webhook_name,
             task_id: task.task_id,
-            exit_code: exit_code,
-            stdout: stdout,
-            stderr: stderr,
+            exit_code,
+            stdout,
+            stderr,
         };
 
         task.scheduler.do_send(message);

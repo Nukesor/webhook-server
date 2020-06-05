@@ -87,7 +87,11 @@ async fn index(
     // Check the credentials and signature headers of the request
     verify_authentication_header(&data.settings, &headers, &Vec::new())?;
 
-    let json = data.scheduler.send(GetQueue {}).await.or(Err(HttpResponse::InternalServerError()))?;
+    let json = data
+        .scheduler
+        .send(GetQueue {})
+        .await
+        .or(Err(HttpResponse::InternalServerError()))?;
     Ok(HttpResponse::Ok()
         .header(http::header::CONTENT_TYPE, "application/json")
         .body(json))
