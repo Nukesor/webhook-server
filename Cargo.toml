@@ -26,7 +26,7 @@ handlebars = "3"
 chrono = { version = "0.4", features = ["serde"] }
 
 config = "0.10"
-dirs = "2"
+dirs = "3"
 anyhow = "1"
 log = "0.4"
 simplelog = "0.8"
