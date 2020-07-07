@@ -1,6 +1,6 @@
 use ::actix_web::{http, HttpResponse};
 use ::hex;
-use ::hmac::{Hmac, Mac};
+use ::hmac::{Hmac, Mac, NewMac};
 use ::log::warn;
 use ::sha1::Sha1;
 use ::std::collections::HashMap;
@@ -108,7 +108,7 @@ fn verify_signature_header(
         Err(_) => {
             warn!(
                 "Our sha1: {}",
-                hex::encode(expected_signature.result().code())
+                hex::encode(expected_signature.finalize().into_bytes())
             );
             warn!("Got wrong sha1: {}", signature);
             Err(HttpResponse::Unauthorized().body("Invalid sha1 signature"))
@@ -120,7 +120,7 @@ fn verify_signature_header(
 fn generate_signature_sha1(secret_bytes: &Vec<u8>, body: &Vec<u8>) -> HmacSha1 {
     let mut hmac =
         HmacSha1::new_varkey(secret_bytes).expect("Couldn't create hmac with current secret");
-    hmac.input(body);
+    hmac.update(body);
     hmac
 }
 
@@ -228,7 +228,7 @@ mod tests {
         let prefix = "sha1=".to_string();
         headers.insert(
             "signature".to_string(),
-            prefix + &hex::encode(hmac.result().code()),
+            prefix + &hex::encode(hmac.finalize().into_bytes()),
         );
     }
 

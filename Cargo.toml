@@ -18,7 +18,7 @@ path = "src/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rustls = "0.18"
+rustls = "0.17"
 actix = "0.10.0-alpha.3"
 actix-rt = "1.0.0"
 actix-web = { version = "3.0.0-alpha.3", features=["rustls"]}
