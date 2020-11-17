@@ -135,9 +135,7 @@ fn verify_basic_auth_header(
         header.clone()
     } else {
         warn!("Send basic auth browser request");
-        return Err(HttpResponse::Unauthorized()
-            .set_header(http::header::WWW_AUTHENTICATE, "Basic")
-            .finish());
+        return Err(get_autorization_request());
     };
 
     // Header must be formatted like this: `Basic {{base64_string}}`
@@ -174,22 +172,28 @@ fn verify_basic_auth_header(
     let user = if let Some(user) = &settings.basic_auth_user {
         user
     } else {
-        return Err(HttpResponse::Unauthorized().finish());
+        return Err(get_autorization_request());
     };
 
     // Ensure password is set in config
     let password = if let Some(password) = &settings.basic_auth_password {
         password
     } else {
-        return Err(HttpResponse::Unauthorized().finish());
+        return Err(get_autorization_request());
     };
 
     if user != credentials[0] || password != credentials[1] {
         warn!("Got invalid base64 credentials");
-        return Err(HttpResponse::Unauthorized().finish());
+        return Err(get_autorization_request());
     }
 
     Ok(())
+}
+
+fn get_autorization_request() -> HttpResponse {
+    HttpResponse::Unauthorized()
+        .set_header(http::header::WWW_AUTHENTICATE, "Basic")
+        .finish()
 }
 
 #[cfg(test)]
