@@ -1,9 +1,7 @@
-mod authentication;
 mod messages;
 mod scheduler;
 mod settings;
-mod task_executor;
-mod task_queue;
+mod task;
 mod web;
 
 use ::actix::prelude::*;
@@ -13,7 +11,7 @@ use ::simplelog::{Config, LevelFilter, SimpleLogger};
 
 use crate::scheduler::Scheduler;
 use crate::settings::Settings;
-use crate::task_executor::TaskExecutor;
+use crate::task::executor::TaskExecutor;
 use crate::web::init_web_server;
 
 fn main() -> Result<()> {

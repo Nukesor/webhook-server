@@ -1,38 +1,11 @@
-use ::chrono::prelude::*;
-use ::serde::Serialize;
-use ::std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap};
+
+use serde::Serialize;
 
 use crate::messages::NewTask;
 use crate::messages::TaskCompleted;
 use crate::settings::Settings;
-
-/// The Task is a simple struct to store all information about the state of a task.
-#[derive(Serialize, Debug, Clone)]
-pub struct Task {
-    pub webhook_name: String,
-    pub task_id: i32,
-    pub command: String,
-    pub cwd: String,
-    pub exit_code: Option<u32>,
-    pub stdout: Option<String>,
-    pub stderr: Option<String>,
-    pub added_at: DateTime<Local>,
-}
-
-impl Task {
-    pub fn new(new_task: NewTask, id: i32) -> Task {
-        Task {
-            webhook_name: new_task.webhook_name,
-            task_id: id,
-            command: new_task.command,
-            cwd: new_task.cwd,
-            exit_code: None,
-            stdout: None,
-            stderr: None,
-            added_at: new_task.added_at,
-        }
-    }
-}
+use crate::task::task::Task;
 
 /// The TaskQueue represents the current state of all tasks and is also
 /// responsible for the management of these.
@@ -66,10 +39,8 @@ impl TaskQueue {
         TaskQueue {
             max_id: 0,
             settings: settings.clone(),
-
-            queued_count: queued_count,
-            running_count: running_count,
-
+            queued_count,
+            running_count,
             queued: BTreeMap::new(),
             running: BTreeMap::new(),
             finished: BTreeMap::new(),

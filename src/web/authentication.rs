@@ -1,10 +1,11 @@
-use ::actix_web::{http, HttpResponse};
-use ::hex;
-use ::hmac::{Hmac, Mac, NewMac};
-use ::log::warn;
-use ::sha1::Sha1;
-use ::std::collections::HashMap;
+use std::collections::HashMap;
+
+use actix_web::{http, HttpResponse};
 use base64;
+use hex;
+use hmac::{Hmac, Mac, NewMac};
+use log::warn;
+use sha1::Sha1;
 
 use crate::settings::Settings;
 

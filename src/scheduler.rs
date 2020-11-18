@@ -3,8 +3,8 @@ use ::log::info;
 
 use crate::messages::*;
 use crate::settings::Settings;
-use crate::task_executor::TaskExecutor;
-use crate::task_queue::TaskQueue;
+use crate::task::executor::TaskExecutor;
+use crate::task::queue::TaskQueue;
 
 pub struct Scheduler {
     pub task_executor: Addr<TaskExecutor>,
