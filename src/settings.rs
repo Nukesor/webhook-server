@@ -139,7 +139,7 @@ fn parse_config(mut settings: Config) -> Result<Config> {
 
     for path in config_paths.into_iter() {
         info!("Checking path: {:?}", &path);
-        if path.exists() {
+        if path.exists() && path.is_file() {
             info!("Parsing config file at: {:?}", path);
             let config_file = config::File::with_name(path.to_str().unwrap());
             settings.merge(config_file)?;
