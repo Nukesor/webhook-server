@@ -120,7 +120,7 @@ fn verify_signature_header(
 /// Create a hmac SHA1 instance from a secret and body
 fn generate_signature_sha1(secret_bytes: &Vec<u8>, body: &Vec<u8>) -> HmacSha1 {
     let mut hmac =
-        HmacSha1::new_varkey(secret_bytes).expect("Couldn't create hmac with current secret");
+        HmacSha1::new_from_slice(secret_bytes).expect("Couldn't create hmac with current secret");
     hmac.update(body);
     hmac
 }
@@ -193,7 +193,7 @@ fn verify_basic_auth_header(
 
 fn get_autorization_request() -> HttpResponse {
     HttpResponse::Unauthorized()
-        .set_header(http::header::WWW_AUTHENTICATE, "Basic")
+        .insert_header((http::header::WWW_AUTHENTICATE, "Basic"))
         .finish()
 }
 

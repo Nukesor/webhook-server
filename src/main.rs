@@ -15,7 +15,7 @@ use crate::task::executor::TaskExecutor;
 use crate::web::init_web_server;
 
 fn main() -> Result<()> {
-    let system = System::new("webhook-server");
+    let system = System::new();
     let _ = SimpleLogger::init(LevelFilter::Info, Config::default());
     let settings = Settings::new()?;
 
