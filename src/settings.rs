@@ -30,8 +30,8 @@ fn webhook_parallel_default() -> i32 {
 pub struct Settings {
     pub domain: String,
     pub port: i32,
-    pub ssl_private_key: Option<String>,
-    pub ssl_cert_chain: Option<String>,
+    pub ssl_private_key: Option<PathBuf>,
+    pub ssl_cert_chain: Option<PathBuf>,
     pub secret: Option<String>,
     pub basic_auth_user: Option<String>,
     pub basic_auth_password: Option<String>,
