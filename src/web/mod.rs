@@ -8,6 +8,7 @@ use actix::prelude::*;
 use actix_web::*;
 use anyhow::{anyhow, bail, Context, Result};
 use config::ConfigError;
+use log::info;
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{pkcs8_private_keys, rsa_private_keys};
 use serde::Deserialize;
@@ -35,6 +36,7 @@ pub struct Payload {
 /// Move the address of the queue actor inside the AppState for further dispatch
 /// of tasks to the actor
 pub fn init_web_server(scheduler: Addr<Scheduler>, settings: Settings) -> Result<()> {
+    info!("Initializing web server");
     let settings_for_app = settings.clone();
     let server = HttpServer::new(move || {
         App::new()
@@ -63,9 +65,11 @@ pub fn init_web_server(scheduler: Addr<Scheduler>, settings: Settings) -> Result
                 .with_single_cert(certs, key)
                 .map_err(|err| anyhow!("Failed to build TLS Acceptor: {}", err))?;
 
+            info!("Starting web server");
             server.bind_rustls(address, config)?.run();
         }
         (None, None) => {
+            info!("Starting web server");
             server.bind(address)?.run();
         }
         (Some(_), None) => {

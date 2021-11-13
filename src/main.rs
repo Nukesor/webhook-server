@@ -15,6 +15,9 @@ use crate::task::executor::TaskExecutor;
 use crate::web::init_web_server;
 
 fn main() -> Result<()> {
+    // Beautify panics for better debug output.
+    better_panic::install();
+
     let system = System::new();
     let _ = SimpleLogger::init(LevelFilter::Info, Config::default());
     let settings = Settings::new()?;
@@ -25,10 +28,16 @@ fn main() -> Result<()> {
     let task_executor =
         SyncArbiter::start(settings.workers, move || TaskExecutor { scheduler: None });
 
+    info!("Initializing scheduler");
     let scheduler = Scheduler::new(task_executor.clone(), settings.clone());
 
-    init_web_server(scheduler.start(), settings)?;
+    info!("Starting scheduler");
+    let scheduler = scheduler.start();
 
+    info!("Starting web server");
+    init_web_server(scheduler, settings)?;
+
+    info!("Done");
     let _ = system.run();
 
     Ok(())
