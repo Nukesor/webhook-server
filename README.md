@@ -2,11 +2,10 @@
 
 [![GitHub release](https://img.shields.io/github/tag/nukesor/webhook-server.svg)](https://github.com/nukesor/webhook-server/releases/latest)
 [![Actions Status](https://github.com/Nukesor/webhook-server/workflows/Tests/badge.svg)](https://github.com/Nukesor/webhook-server/actions)
- [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
-[![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Paypal](https://github.com/Nukesor/images/blob/main/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
 
-![Webhook server example](https://github.com/Nukesor/images/blob/master/webhook-server.gif)
+![Webhook server example](https://github.com/Nukesor/images/blob/main/webhook-server.gif)
 
 This little helper serves a simple purpose: Execute commands on your server on incoming http requests.
 Initially, it has been designed for continuous integration and supports Github's webhooks out of the box.
@@ -22,7 +21,7 @@ Tasks can be processed in parallel or one-by-one, the mode of execution and amou
 - Trigger tasks on your server via a browser.
 - Trigger tasks between servers with a minimal setup.
 
-Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/master/webhook_server.yml).
+Take a look at the example config file [webhook_server.yml](https://github.com/Nukesor/webhook-server/blob/main/webhook_server.yml).
 
 ## Installation
 
@@ -98,7 +97,7 @@ webhooks:
 
 ## Misc files
 
-There are some template files for your setup in the [misc folder](https://github.com/Nukesor/webhook-server/tree/master/misc) of the repository.
+There are some template files for your setup in the [misc folder](https://github.com/Nukesor/webhook-server/tree/main/misc) of the repository.
 These include:
 
 - A nginx proxy route example
