@@ -7,6 +7,13 @@
 
 ![Webhook server example](https://github.com/Nukesor/images/blob/main/webhook-server.gif)
 
+**!!!! ATTENTION !!!!**
+
+Development on this project has stopped and the newest version no longer works!
+There are other more mature webhook server implementations, such as https://github.com/adnanh/webhook.
+
+**!!!! ATTENTION !!!!**
+
 This little helper serves a simple purpose: Execute commands on your server on incoming http requests.
 Initially, it has been designed for continuous integration and supports Github's webhooks out of the box.
 
